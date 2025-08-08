@@ -1,0 +1,187 @@
+C:\Program Files\Python38\Scripts>pip install d:\temp\pylibs\xlrd2-1.3.4-py2.py3
+-none-any.whl
+Processing d:\temp\pylibs\xlrd2-1.3.4-py2.py3-none-any.whl
+Installing collected packages: xlrd2
+ERROR: Could not install packages due to an EnvironmentError: [WinError 5] Отказ
+ано в доступе: 'c:\\program files\\python38\\Lib\\site-packages\\xlrd2'
+Consider using the `--user` option or check the permissions.
+
+
+C:\Program Files\Python38\Scripts>cd ..
+
+C:\Program Files\Python38>cd ..
+
+C:\Program Files>cd ..
+
+C:\>cd python27
+
+C:\Python27>cd scripts
+
+C:\Python27\Scripts>C:\Program Files\Python38\Scripts>pip install d:\temp\pylibs
+\xlrd2-1.3.4-py2.py3
+"C:\Program" не является внутренней или внешней
+командой, исполняемой программой или пакетным файлом.
+
+C:\Python27\Scripts>pip install d:\temp\pylibs\xlrd2-1.3.4-py2.py3-none-any.whl
+Processing d:\temp\pylibs\xlrd2-1.3.4-py2.py3-none-any.whl
+Installing collected packages: xlrd2
+Successfully installed xlrd2-1.3.4
+
+C:\Python27\Scripts>pip install d:\temp\pylibs\xlwt-1.3.0-py2.py3-none-any.whl
+Processing d:\temp\pylibs\xlwt-1.3.0-py2.py3-none-any.whl
+Installing collected packages: xlwt
+Successfully installed xlwt-1.3.0
+
+C:\Python27\Scripts>pip install d:\temp\pylibs\pyexcel-0.5.15.tar.gz
+Processing d:\temp\pylibs\pyexcel-0.5.15.tar.gz
+Collecting lml>=0.0.4 (from pyexcel==0.5.15)
+  Retrying (Retry(total=4, connect=None, read=None, redirect=None)) after connec
+tion broken by 'ConnectTimeoutError(<pip._vendor.requests.packages.urllib3.conne
+ction.VerifiedHTTPSConnection object at 0x0000000003FCCA20>, 'Connection to pypi
+.python.org timed out. (connect timeout=15)')': /simple/lml/
+  Retrying (Retry(total=3, connect=None, read=None, redirect=None)) after connec
+tion broken by 'ConnectTimeoutError(<pip._vendor.requests.packages.urllib3.conne
+ction.VerifiedHTTPSConnection object at 0x0000000003FCC898>, 'Connection to pypi
+.python.org timed out. (connect timeout=15)')': /simple/lml/
+  Retrying (Retry(total=2, connect=None, read=None, redirect=None)) after connec
+tion broken by 'ConnectTimeoutError(<pip._vendor.requests.packages.urllib3.conne
+ction.VerifiedHTTPSConnection object at 0x0000000003FCC0F0>, 'Connection to pypi
+.python.org timed out. (connect timeout=15)')': /simple/lml/
+  Retrying (Retry(total=1, connect=None, read=None, redirect=None)) after connec
+tion broken by 'ConnectTimeoutError(<pip._vendor.requests.packages.urllib3.conne
+ction.VerifiedHTTPSConnection object at 0x0000000003FCCEF0>, 'Connection to pypi
+.python.org timed out. (connect timeout=15)')': /simple/lml/
+  Retrying (Retry(total=0, connect=None, read=None, redirect=None)) after connec
+tion broken by 'ConnectTimeoutError(<pip._vendor.requests.packages.urllib3.conne
+ction.VerifiedHTTPSConnection object at 0x0000000003FCCB00>, 'Connection to pypi
+.python.org timed out. (connect timeout=15)')': /simple/lml/
+  Could not find a version that satisfies the requirement lml>=0.0.4 (from pyexc
+el==0.5.15) (from versions: )
+No matching distribution found for lml>=0.0.4 (from pyexcel==0.5.15)
+
+C:\Python27\Scripts>pip install d:\temp\pylibs\pyexcel-0.5.15-py2.py3-none-any.w
+hl
+Processing d:\temp\pylibs\pyexcel-0.5.15-py2.py3-none-any.whl
+Collecting pyexcel-io>=0.5.19 (from pyexcel==0.5.15)
+  Retrying (Retry(total=4, connect=None, read=None, redirect=None)) after connec
+tion broken by 'ConnectTimeoutError(<pip._vendor.requests.packages.urllib3.conne
+ction.VerifiedHTTPSConnection object at 0x0000000003996668>, 'Connection to pypi
+.python.org timed out. (connect timeout=15)')': /simple/pyexcel-io/
+  Retrying (Retry(total=3, connect=None, read=None, redirect=None)) after connec
+tion broken by 'ConnectTimeoutError(<pip._vendor.requests.packages.urllib3.conne
+ction.VerifiedHTTPSConnection object at 0x00000000039965F8>, 'Connection to pypi
+.python.org timed out. (connect timeout=15)')': /simple/pyexcel-io/
+  Retrying (Retry(total=2, connect=None, read=None, redirect=None)) after connec
+tion broken by 'ConnectTimeoutError(<pip._vendor.requests.packages.urllib3.conne
+ction.VerifiedHTTPSConnection object at 0x0000000003996B38>, 'Connection to pypi
+.python.org timed out. (connect timeout=15)')': /simple/pyexcel-io/
+  Retrying (Retry(total=1, connect=None, read=None, redirect=None)) after connec
+tion broken by 'ConnectTimeoutError(<pip._vendor.requests.packages.urllib3.conne
+ction.VerifiedHTTPSConnection object at 0x0000000003996E10>, 'Connection to pypi
+.python.org timed out. (connect timeout=15)')': /simple/pyexcel-io/
+  Retrying (Retry(total=0, connect=None, read=None, redirect=None)) after connec
+tion broken by 'ConnectTimeoutError(<pip._vendor.requests.packages.urllib3.conne
+ction.VerifiedHTTPSConnection object at 0x00000000039967F0>, 'Connection to pypi
+.python.org timed out. (connect timeout=15)')': /simple/pyexcel-io/
+  Could not find a version that satisfies the requirement pyexcel-io>=0.5.19 (fr
+om pyexcel==0.5.15) (from versions: )
+No matching distribution found for pyexcel-io>=0.5.19 (from pyexcel==0.5.15)
+
+C:\Python27\Scripts>pip install d:\temp\pylibs\openpyxl-2.6.4.tar.gz
+Processing d:\temp\pylibs\openpyxl-2.6.4.tar.gz
+Collecting jdcal (from openpyxl==2.6.4)
+  Retrying (Retry(total=4, connect=None, read=None, redirect=None)) after connec
+tion broken by 'ConnectTimeoutError(<pip._vendor.requests.packages.urllib3.conne
+ction.VerifiedHTTPSConnection object at 0x0000000004131438>, 'Connection to pypi
+.python.org timed out. (connect timeout=15)')': /simple/jdcal/
+  Retrying (Retry(total=3, connect=None, read=None, redirect=None)) after connec
+tion broken by 'ConnectTimeoutError(<pip._vendor.requests.packages.urllib3.conne
+ction.VerifiedHTTPSConnection object at 0x0000000004131BA8>, 'Connection to pypi
+.python.org timed out. (connect timeout=15)')': /simple/jdcal/
+  Retrying (Retry(total=2, connect=None, read=None, redirect=None)) after connec
+tion broken by 'ConnectTimeoutError(<pip._vendor.requests.packages.urllib3.conne
+ction.VerifiedHTTPSConnection object at 0x00000000041312E8>, 'Connection to pypi
+.python.org timed out. (connect timeout=15)')': /simple/jdcal/
+  Retrying (Retry(total=1, connect=None, read=None, redirect=None)) after connec
+tion broken by 'ConnectTimeoutError(<pip._vendor.requests.packages.urllib3.conne
+ction.VerifiedHTTPSConnection object at 0x00000000041313C8>, 'Connection to pypi
+.python.org timed out. (connect timeout=15)')': /simple/jdcal/
+  Retrying (Retry(total=0, connect=None, read=None, redirect=None)) after connec
+tion broken by 'ConnectTimeoutError(<pip._vendor.requests.packages.urllib3.conne
+ction.VerifiedHTTPSConnection object at 0x0000000004131898>, 'Connection to pypi
+.python.org timed out. (connect timeout=15)')': /simple/jdcal/
+  Could not find a version that satisfies the requirement jdcal (from openpyxl==
+2.6.4) (from versions: )
+No matching distribution found for jdcal (from openpyxl==2.6.4)
+
+C:\Python27\Scripts>pip install d:\temp\pylibs\soupsieve-1.9.6-py2.py3-none-any.
+whl
+Processing d:\temp\pylibs\soupsieve-1.9.6-py2.py3-none-any.whl
+Collecting backports.functools-lru-cache; python_version < "3" (from soupsieve==
+1.9.6)
+  Retrying (Retry(total=4, connect=None, read=None, redirect=None)) after connec
+tion broken by 'ConnectTimeoutError(<pip._vendor.requests.packages.urllib3.conne
+ction.VerifiedHTTPSConnection object at 0x0000000003DA66D8>, 'Connection to pypi
+.python.org timed out. (connect timeout=15)')': /simple/backports-functools-lru-
+cache/
+  Retrying (Retry(total=3, connect=None, read=None, redirect=None)) after connec
+tion broken by 'ConnectTimeoutError(<pip._vendor.requests.packages.urllib3.conne
+ction.VerifiedHTTPSConnection object at 0x0000000003DA6FD0>, 'Connection to pypi
+.python.org timed out. (connect timeout=15)')': /simple/backports-functools-lru-
+cache/
+  Retrying (Retry(total=2, connect=None, read=None, redirect=None)) after connec
+tion broken by 'ConnectTimeoutError(<pip._vendor.requests.packages.urllib3.conne
+ction.VerifiedHTTPSConnection object at 0x0000000003DA62B0>, 'Connection to pypi
+.python.org timed out. (connect timeout=15)')': /simple/backports-functools-lru-
+cache/
+  Retrying (Retry(total=1, connect=None, read=None, redirect=None)) after connec
+tion broken by 'ConnectTimeoutError(<pip._vendor.requests.packages.urllib3.conne
+ction.VerifiedHTTPSConnection object at 0x0000000003DA6DA0>, 'Connection to pypi
+.python.org timed out. (connect timeout=15)')': /simple/backports-functools-lru-
+cache/
+  Retrying (Retry(total=0, connect=None, read=None, redirect=None)) after connec
+tion broken by 'ConnectTimeoutError(<pip._vendor.requests.packages.urllib3.conne
+ction.VerifiedHTTPSConnection object at 0x0000000003DA6860>, 'Connection to pypi
+.python.org timed out. (connect timeout=15)')': /simple/backports-functools-lru-
+cache/
+  Could not find a version that satisfies the requirement backports.functools-lr
+u-cache; python_version < "3" (from soupsieve==1.9.6) (from versions: )
+No matching distribution found for backports.functools-lru-cache; python_version
+ < "3" (from soupsieve==1.9.6)
+
+C:\Python27\Scripts>pip install d:\temp\pylibs\beautifulsoup4-4.9.3-py2-none-any
+.whl
+Processing d:\temp\pylibs\beautifulsoup4-4.9.3-py2-none-any.whl
+Collecting soupsieve<2.0,>1.2; python_version < "3.0" (from beautifulsoup4==4.9.
+3)
+  Retrying (Retry(total=4, connect=None, read=None, redirect=None)) after connec
+tion broken by 'ConnectTimeoutError(<pip._vendor.requests.packages.urllib3.conne
+ction.VerifiedHTTPSConnection object at 0x00000000039A22B0>, 'Connection to pypi
+.python.org timed out. (connect timeout=15)')': /simple/soupsieve/
+  Retrying (Retry(total=3, connect=None, read=None, redirect=None)) after connec
+tion broken by 'ConnectTimeoutError(<pip._vendor.requests.packages.urllib3.conne
+ction.VerifiedHTTPSConnection object at 0x00000000039A27B8>, 'Connection to pypi
+.python.org timed out. (connect timeout=15)')': /simple/soupsieve/
+  Retrying (Retry(total=2, connect=None, read=None, redirect=None)) after connec
+tion broken by 'ConnectTimeoutError(<pip._vendor.requests.packages.urllib3.conne
+ction.VerifiedHTTPSConnection object at 0x00000000039A2B00>, 'Connection to pypi
+.python.org timed out. (connect timeout=15)')': /simple/soupsieve/
+  Retrying (Retry(total=1, connect=None, read=None, redirect=None)) after connec
+tion broken by 'ConnectTimeoutError(<pip._vendor.requests.packages.urllib3.conne
+ction.VerifiedHTTPSConnection object at 0x00000000039A2B38>, 'Connection to pypi
+.python.org timed out. (connect timeout=15)')': /simple/soupsieve/
+  Retrying (Retry(total=0, connect=None, read=None, redirect=None)) after connec
+tion broken by 'ConnectTimeoutError(<pip._vendor.requests.packages.urllib3.conne
+ction.VerifiedHTTPSConnection object at 0x00000000039A2AC8>, 'Connection to pypi
+.python.org timed out. (connect timeout=15)')': /simple/soupsieve/
+  Could not find a version that satisfies the requirement soupsieve<2.0,>1.2; py
+thon_version < "3.0" (from beautifulsoup4==4.9.3) (from versions: )
+No matching distribution found for soupsieve<2.0,>1.2; python_version < "3.0" (f
+rom beautifulsoup4==4.9.3)
+
+C:\Python27\Scripts>
+
+pip install d:\temp\pylibs\xlrd2-1.3.4-py2.py3-none-any.whl
+
+pip install d:\temp\pylibs\xlwt-1.3.0-py2.py3-none-any.whl
+pip install d:\temp\pylibs\soupsieve-2.3.2.post1-py3-none-any.whl

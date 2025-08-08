@@ -1,0 +1,8 @@
+"This is first line in english
+Это вторая строка нга русском
+Das ist der dritte in Deutsche
+12;23;34;45
+This is sentence #1. This is sentence #2. 
+\nThis is sentence #3.
+ This is sentence #4.
+ 

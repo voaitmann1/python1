@@ -1,0 +1,176 @@
+Calculating Query
+
+solving expr: 10 == 11 or 12 == 12 or 13 != 12 and14 >  15 and16 == 16 or 
+# solving expr:  +8  +7  +6  *5  **2  *2  +10 
+#                1   2   3   4   5    6   7
+# ce vrn arb ver ac () ma n'arb ver co ()
+S calc't id in () ma in brackets op01 s'0. So not do ut num af recursio be ab recursio, ma op01 - ab pre-recursio
+
+Calculating AlgExpr
+
+solving expr:  +8  +7  +6  *5  **(2  *2)  +10 
+('CalcExpr starts working. N=', 2)
+length of expression = 7
+given (sub)structure has type AlgExprPart
+Start point of cycle. N: =2
+there was no recursion. Expr from dataFlow N 2:  +7 
+... . 8 + 7 + ...
+Analyzing
+Brackets of parts: prePart: open: 0 shut: 0; cuPart: open: 0 shut: 0
+cases 3 - immediate calc
+Calc works: y := 8 + 7 = 15 (OpN=1 priority: 1)
+Case 3.1 - Immediate calc - with continuing: priority of cur operator priority (1 opN=1 +) IS higher than of prev (0 opN=0 .)
+End point of cycle N=3 L=7 contin=1
+Start point of cycle. N: =3
+there was no recursion. Expr from dataFlow N 3:  +6 
+... . 15 + 6 * ...
+Analyzing
+Brackets of parts: prePart: open: 0 shut: 0; cuPart: open: 0 shut: 0
+starting recursion with ini expr data: N=4 pre expr part:  +6 
+('CalcExpr starts working. N=', 4)
+length of expression = 7
+given (sub)structure has type AlgExprPart
+Start point of cycle. N: =4
+there was no recursion. Expr from dataFlow N 4:  *5 
+... + 6 * 5 ** ...
+Analyzing
+Brackets of parts: prePart: open: 0 shut: 0; cuPart: open: 0 shut: 0
+starting recursion with ini expr data: N=5 pre expr part:  *5 
+('CalcExpr starts working. N=', 5)
+length of expression = 7
+given (sub)structure has type AlgExprPart
+Start point of cycle. N: =5
+there was no recursion. Expr from dataFlow N 5:  **(2 
+... * 5 ** 2 * ...
+Analyzing
+Brackets of parts: prePart: open: 0 shut: 0; cuPart: open: 1 shut: 0
+starting recursion with ini expr data: N=6 pre expr part:  **(2 
+('CalcExpr starts working. N=', 6)
+length of expression = 7
+given (sub)structure has type AlgExprPart
+Start point of cycle. N: =6
+there was no recursion. Expr from dataFlow N 6:  *2) 
+... . 2 * 2 .
+Case 1 - starting recursion without any calcs - bracket open (left: 0). Starting recursion (ob ()) with operand=2, operator=0, N=6
+('CalcExpr starts working. N=', 6)
+length of expression = 7
+given (sub)structure has type AlgExprPart
+Start point of cycle. N: =6
+there was no recursion. Expr from dataFlow N 6:  *2) 
+... . 2 * 2 .
+Analyzing
+Brackets of parts: prePart: open: 0 shut: 0; cuPart: open: 0 shut: 1
+cases 3 - immediate calc
+Calc works: y := 2 * 2 = 4 (OpN=3 priority: 2)
+Case 3.1 - Immediate calc - with continuing: priority of cur operator priority (2 opN=3 *) IS higher than of prev (0 opN=0 .)
+Case 3.2.1 - Immediate calc - with stopping recursion: bracket shut in cur expr element
+End point of cycle N=7 L=7 contin=0
+CalcExpr finishes working. Ngiven=6 N=7 yR=4(full expr  (.unknown.)4) )
+Returning from recursion N=6 to Ngiven=6 and stopping recursion - expression will be at current N after no brackets left
+End point of cycle N=6 L=7 contin=0
+CalcExpr finishes working. Ngiven=6 N=6 yR=0(full expr  +0 )
+returned from recursion to Ngiven=5, from N=0-1=0 now next part:  +0 
+End point of cycle N=0 L=7 contin=1
+Start point of cycle. N: =0
+there was  recursion in jef cycle step (jef'l cycle step, jef-step o'cycle, jef-cycle-step). Expr an ef'y calc'd recursio data:  +0 ( N=0)
+... * 5 + 0 + ...
+Case 2.2 - finishing without any calcs: cur operator' priority (1 opN=1 +) is NOT greater than of prev (2 opN=3 *)
+End point of cycle N=0 L=7 contin=0
+CalcExpr finishes working. Ngiven=5 N=0 yR=5(full expr  *5 )
+returned from recursion to Ngiven=4, from N=-1-1=-1 now next part:  *5 
+End point of cycle N=-1 L=7 contin=1
+Start point of cycle. N: =-1
+there was  recursion in jef cycle step (jef'l cycle step, jef-step o'cycle, jef-cycle-step). Expr an ef'y calc'd recursio data:  *5 ( N=-1)
+... + 6 * 5 + ...
+Analyzing
+Brackets of parts: prePart: open: 0 shut: 0; cuPart: open: 0 shut: 0
+cases 3 - immediate calc
+Calc works: y := 6 * 5 = 30 (OpN=3 priority: 2)
+Case 3.1 - Immediate calc - with continuing: priority of cur operator priority (2 opN=3 *) IS higher than of prev (1 opN=1 +)
+End point of cycle N=0 L=7 contin=1
+Start point of cycle. N: =0
+there was no recursion. Expr from dataFlow N 0:  +10 
+... + 30 + 10 + ...
+Case 2.2 - finishing without any calcs: cur operator' priority (1 opN=1 +) is NOT greater than of prev (1 opN=1 +)
+End point of cycle N=0 L=7 contin=0
+CalcExpr finishes working. Ngiven=4 N=0 yR=30(full expr  +30 )
+returned from recursion to Ngiven=1, from N=-1-1=-1 now next part:  +30 
+End point of cycle N=-1 L=7 contin=1
+Start point of cycle. N: =-1
+there was  recursion in jef cycle step (jef'l cycle step, jef-step o'cycle, jef-cycle-step). Expr an ef'y calc'd recursio data:  +30 ( N=-1)
+... . 15 + 30 + ...
+Analyzing
+Brackets of parts: prePart: open: 0 shut: 0; cuPart: open: 0 shut: 0
+cases 3 - immediate calc
+Calc works: y := 15 + 30 = 45 (OpN=1 priority: 1)
+Case 3.1 - Immediate calc - with continuing: priority of cur operator priority (1 opN=1 +) IS higher than of prev (0 opN=0 .)
+End point of cycle N=0 L=7 contin=1
+Start point of cycle. N: =0
+there was no recursion. Expr from dataFlow N 0:  +10 
+... . 45 + 10 + ...
+Analyzing
+Brackets of parts: prePart: open: 0 shut: 0; cuPart: open: 0 shut: 0
+cases 3 - immediate calc
+Calc works: y := 45 + 10 = 55 (OpN=1 priority: 1)
+Case 3.1 - Immediate calc - with continuing: priority of cur operator priority (1 opN=1 +) IS higher than of prev (0 opN=0 .)
+End point of cycle N=1 L=7 contin=1
+Start point of cycle. N: =1
+there was no recursion. Expr from dataFlow N 1:  +8 
+... . 55 + 8 + ...
+Analyzing
+Brackets of parts: prePart: open: 0 shut: 0; cuPart: open: 0 shut: 0
+cases 3 - immediate calc
+Calc works: y := 55 + 8 = 63 (OpN=1 priority: 1)
+Case 3.1 - Immediate calc - with continuing: priority of cur operator priority (1 opN=1 +) IS higher than of prev (0 opN=0 .)
+End point of cycle N=2 L=7 contin=1
+Start point of cycle. N: =2
+there was no recursion. Expr from dataFlow N 2:  +15 
+... . 63 + 15 + ...
+Analyzing
+Brackets of parts: prePart: open: 0 shut: 0; cuPart: open: 0 shut: 0
+cases 3 - immediate calc
+Calc works: y := 63 + 15 = 78 (OpN=1 priority: 1)
+Case 3.1 - Immediate calc - with continuing: priority of cur operator priority (1 opN=1 +) IS higher than of prev (0 opN=0 .)
+End point of cycle N=3 L=7 contin=1
+Start point of cycle. N: =3
+there was no recursion. Expr from dataFlow N 3:  +6 
+... . 78 + 6 * ...
+Analyzing
+Brackets of parts: prePart: open: 0 shut: 0; cuPart: open: 0 shut: 0
+starting recursion with ini expr data: N=4 pre expr part:  +6 
+('CalcExpr starts working. N=', 4)
+length of expression = 7
+given (sub)structure has type AlgExprPart
+Start point of cycle. N: =4
+there was no recursion. Expr from dataFlow N 4:  *5 
+... + 6 * 5 . ...
+Analyzing
+Brackets of parts: prePart: open: 0 shut: 0; cuPart: open: 0 shut: 0
+cases 3 - immediate calc
+Calc works: y := 6 * 5 = 30 (OpN=3 priority: 2)
+Case 3.1 - Immediate calc - with continuing: priority of cur operator priority (2 opN=3 *) IS higher than of prev (1 opN=1 +)
+End point of cycle N=5 L=7 contin=1
+Start point of cycle. N: =5
+there was no recursion. Expr from dataFlow N 5:  (.unknown.)2 
+... + 30 . 2 . ...
+Case 2.2 - finishing without any calcs: cur operator' priority (0 opN=0 .) is NOT greater than of prev (1 opN=1 +)
+End point of cycle N=5 L=7 contin=0
+CalcExpr finishes working. Ngiven=4 N=5 yR=30(full expr  +30 )
+returned from recursion to Ngiven=1, from N=4-1=4 now next part:  +30 
+End point of cycle N=4 L=7 contin=1
+Start point of cycle. N: =4
+there was  recursion in jef cycle step (jef'l cycle step, jef-step o'cycle, jef-cycle-step). Expr an ef'y calc'd recursio data:  +30 ( N=4)
+... . 78 + 30 . ...
+Analyzing
+Brackets of parts: prePart: open: 0 shut: 0; cuPart: open: 0 shut: 0
+cases 3 - immediate calc
+Calc works: y := 78 + 30 = 108 (OpN=1 priority: 1)
+Case 3.1 - Immediate calc - with continuing: priority of cur operator priority (1 opN=1 +) IS higher than of prev (0 opN=0 .)
+End point of cycle N=5 L=7 contin=1
+Start point of cycle. N: =5
+there was no recursion. Expr from dataFlow N 5:  (.unknown.)2 
+... . 108 . 2 . ...
+Case 2.2 - finishing without any calcs: cur operator' priority (0 opN=0 .) is NOT greater than of prev (0 opN=0 .)
+End point of cycle N=5 L=7 contin=0
+CalcExpr finishes working. Ngiven=1 N=5 yR=108(full expr  (.unknown.)108 )
+Answer: y=108 (last N=4)

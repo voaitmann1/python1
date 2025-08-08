@@ -1,0 +1,24 @@
+import math
+z1=10
+z2= 5+6j
+z3=0+2j
+z21=complex(z1)
+z22=complex(z2)
+z23=complex(z3)
+print("z1="+str(z1))
+print("z2="+str(z2))
+print("z3="+str(z3))
+print("z21="+str(z21))
+print("z22="+str(z22))
+print("z23="+str(z23))
+print("Re(z1)="+str(z1.real))
+print("Im(z1)="+str(z1.imag))
+print("Re(z2)="+str(z2.real))
+print("Im(z2)="+str(z2.imag))
+print("z21="+str(z21))
+print("z22="+str(z22))
+print("z23="+str(z23))
+z2MinusZ3=z2-z3
+print("z2MinusZ3="+str(z2MinusZ3))
+z2MinusZ3Quadr=(z2-z3)*(z2-z3)
+print("z2MinusZ3Quadr="+str(z2MinusZ3Quadr))

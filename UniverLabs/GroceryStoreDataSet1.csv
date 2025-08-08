@@ -1,0 +1,6 @@
+"bread", "milk", "cookie",
+"milk", "sour cream",
+"milk", "bread", "sour cream", "cookie",
+"sausage", "sour cream",
+"bread", "milk", "cookie", "sour cream",
+"sweets"

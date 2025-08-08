@@ -1,0 +1,153 @@
+Calculating AlgExpr
+
+solving expr:  +8  +7  +6  *5  **(2  *2)  +10 
+                1   2   3   4     5   6    7
+
+('CalcExpr starts working. N=', 2)
+length of expression = 7
+given (sub)structure has type AlgExprPart
+N: =2
+there was no recursion. Expr from dataFlow N 2:  +7 
+... . 8 + 7 ...
+Analyzing
+Btackets of parts: prePart: open: 0 shut: 0; cuPart: open: 0 shut: 0
+N=2<L=7
+order of cur oper + is NOT greater than of cur oper . => calculating this part
+Now part of expr: .... 8 +  7 + ...
+order of next oper + is NOT greater than of cur oper + => calculating this part
+Calc starts working/ x1=8 op=1 x2=7
+ op=+
+ opN=1
+answer: y=15 Calc finishes working
+N=N+1=3, (going to next cycle step)
+(N=3 L=7 Ngiven=1 -it is not last expr part)
+N: =3
+there was no recursion. Expr from dataFlow N 3:  +6 
+... . 15 + 6 ...
+Analyzing
+Btackets of parts: prePart: open: 0 shut: 0; cuPart: open: 0 shut: 0
+N=3<L=7
+order of cur oper + is NOT greater than of cur oper + => calculating this part
+Now part of expr: .... 15 +  6 * ...
+order of next oper + IS greater than of cur oper *
+(cur part: _0_ brackets open)
+
+starting recursion with ini expr data: N=3 pre expr part:  +6                                                        #1
+('CalcExpr starts working. N=', 4)
+
+length of expression = 7
+given (sub)structure has type AlgExprPart
+N: =4
+there was no recursion. Expr from dataFlow N 4:  *5 
+... + 6 * 5 ...
+Analyzing
+Btackets of parts: prePart: open: 0 shut: 0; cuPart: open: 0 shut: 0
+N=4<L=7
+order of cur oper * is NOT greater than of cur oper . => calculating this part
+Now part of expr: ...+ 6 *  5 ** ...
+order of next oper * IS greater than of cur oper **
+(cur part: _0_ brackets open)
+
+starting recursion with ini expr data: N=4 pre expr part:  *5                                                        #2
+('CalcExpr starts working. N=', 5)
+
+length of expression = 7
+given (sub)structure has type AlgExprPart
+N: =5
+there was no recursion. Expr from dataFlow N 5:  **(2 
+... * 5 ** 2 ...
+Analyzing
+Btackets of parts: prePart: open: 0 shut: 0; cuPart: open: 1 shut: 0
+N=5<L=7
+order of cur oper ** is NOT greater than of cur oper . => calculating this part
+cur oper (after prev): brackets open: 1
+Now part of expr: ...* 5 **  2 * ...
+(order of next oper ** is NOT greater than of cur oper *)
+cur part: brackets open: 1
+
+starting recursion with ini expr data: N=5 pre expr part:  **(2                                                      #3
+('CalcExpr starts working. N=', 6)
+
+length of expression = 7
+given (sub)structure has type AlgExprPart
+N: =6
+there was no recursion. Expr from dataFlow N 6:  *2) 
+... ** 2 * 2 ...
+
+Bracket open (in pre part; left: 0). Starting recursion (ob ()) with operand=2, operator=0, N=6
+('CalcExpr starts working. N=', 6)
+
+length of expression = 7
+given (sub)structure has type AlgExprPart
+N: =6
+there was no recursion. Expr from dataFlow N 6:  *2) 
+... . 2 * 2 ...
+Analyzing
+Btackets of parts: prePart: open: 0 shut: 0; cuPart: open: 0 shut: 1
+(order of prev oper .(opN=0 ordN=0) is NOT greater than of cur *(opN=3 ordN=2))
+Calc starts working/ x1=2 op=3 x2=2
+ op=*
+ opN=3
+answer: y=4 Calc finishes working
+case 3.3 brackets shut
+expr now is : +4                                                                                               Err: ms'be **4
+shut brackets: 1 -> 0
+Now cur part= *2 ( N=6)
+
+CalcExpr finishes working. Ngiven=6 N=6 N returned: 6 yR=4(full expr  +0 )
+returned from recursion (ic ob ()). N=6=N=6 to Ngiven=6                                                                    #3
+
+CalcExpr finishes working. Ngiven=6 N=6 N returned: 7 yR=4(full expr  +4 )
+returned from recursion to Ngiven=5, from N=7-1=6 now next part:  +4 
+(N=6 L=7 Ngiven=5 -it is not last expr part)
+N: =6
+there was  recursion in jef cycle step (jef'l cycle step, jef-step o'cycle, jef-cycle-step). Expr an ef'y calc'd recursio data:  +4 ( N=6)
+... * 5 + 4 ...
+Analyzing
+Btackets of parts: prePart: open: 0 shut: 0; cuPart: open: 0 shut: 0
+case 3.1 order of cur oper + is NOT higher than of PREV oper * => returning
+expr now is : +5 
+Now cur part= +4 ( N=6)
+
+CalcExpr finishes working. Ngiven=5 N=6 N returned: 6 yR=5(full expr  +4 )
+returned from recursion to Ngiven=4, from N=6-1=5 now next part:  +5                                                        #2
+
+(N=5 L=7 Ngiven=4 -it is not last expr part)
+N: =5
+there was  recursion in jef cycle step (jef'l cycle step, jef-step o'cycle, jef-cycle-step). Expr an ef'y calc'd recursio data:  +5 ( N=5)
+... + 6 + 5 ...
+Analyzing
+Btackets of parts: prePart: open: 0 shut: 0; cuPart: open: 0 shut: 0
+case 3.1 order of cur oper + is NOT higher than of PREV oper + => returning
+expr now is : +6 
+Now cur part= +5 ( N=5)
+
+CalcExpr finishes working. Ngiven=4 N=5 N returned: 5 yR=6(full expr  +5 )
+returned from recursion to Ngiven=1, from N=5-1=4 now next part:  +6                                                         #1
+
+(N=4 L=7 Ngiven=1 -it is not last expr part)
+N: =4
+there was  recursion in jef cycle step (jef'l cycle step, jef-step o'cycle, jef-cycle-step). Expr an ef'y calc'd recursio data:  +6 ( N=4)
+... . 15 + 6 ...
+Analyzing
+Btackets of parts: prePart: open: 0 shut: 0; cuPart: open: 0 shut: 0
+N=4<L=7
+order of cur oper + is NOT greater than of cur oper * => calculating this part
+Now part of expr: .... 15 +  6 . ...
+order of next oper + is NOT greater than of cur oper . => calculating this part
+Calc starts working/ x1=15 op=1 x2=6
+ op=+
+ opN=1
+answer: y=21 Calc finishes working
+N=N+1=5, (going to next cycle step)
+(N=5 L=7 Ngiven=1 -it is not last expr part)
+N: =5
+there was no recursion. Expr from dataFlow N 5:  (.unknown.)2 
+... . 21 . 2 ...
+Analyzing
+Btackets of parts: prePart: open: 0 shut: 0; cuPart: open: 0 shut: 0
+case 3.1 order of cur oper . is NOT higher than of PREV oper . => returning
+expr now is : (.unknown.)21 
+Now cur part= (.unknown.)2 ( N=5)
+CalcExpr finishes working. Ngiven=1 N=5 N returned: 5 yR=21(full expr  (.unknown.)21 )
+Answer: y=21 (last N=5)
