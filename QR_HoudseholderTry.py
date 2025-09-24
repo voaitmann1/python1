@@ -1,4 +1,5 @@
-#import numpy as np
+import numpy as np
+import copy
 
 A = [
     [1, 2, 3, 4, 5],
@@ -257,8 +258,8 @@ print(row)
 arr2D_SetExtRow_simple(D, [210, 220, 230], 2)
 print(D)
 
-from __future__ import print_function, division  # הכÿ סמגלוסעטלמסעט ס Python 2.7
-import numpy as np
+#from __future__ import print_function, division  # הכÿ סמגלוסעטלמסעט ס Python 2.7
+#import numpy as np
 
 def householder_reflection(a):
     v = a.copy()
@@ -308,13 +309,308 @@ def qr_decomposition(A, method='householder'):
 
     return Q, A
 
+def FindEigenVals_RealOnly(A, method='householder', QIts=9, eps=1e-7, vsh=1):
+    A = A.copy()
+    if vsh==1:
+        print("FindEigenVals_RealOnly starts working")
+        print("Matrix given:")
+        print(A)
+    m, n = A.shape
+    eigenVals=[]
+    iter_count=0
+    contin=0
+    Q, R= qr_decomposition(A, method)
+    A=np.dot(R, Q)
+    for i in range(1, QIts+1):
+        Q, R= qr_decomposition(A, method)
+        A=np.dot(R, Q)
+        if vsh==1:
+            print("Iter N "+str(i)+" of Q,R-decomp.. Q:")
+            print(Q)
+            print("R A:")
+            print(A)
+            print("Sub diagonal:")
+            s=""
+            for i in range(1, m-1+1):
+                s=s+str(A[i+1-1][i-1])+" "
+            print(s)
+            print("diagonal:")
+            s=""
+            for i in range(1, m+1):
+                s=s+str(A[i-1][i-1])+" "
+            print(s)
+    for i in range(1, m+1):
+       eigenVals.append(A[i-1][i-1])
+    if vsh==1:
+        print("Answer: ", eigenVals)
+        print("FindEigenVals_RealOnly finishes working")
+    return eigenVals
+
+def FindEigenVals_RealOnly1(A, method='householder', QIts=1, eps=1e-7, vsh=1):
+    A = A.copy()
+    if vsh==1:
+        print("FindEigenVals_RealOnly starts working")
+        print("Matrix given:")
+        print(A)
+    m, n = A.shape
+    eigenVals=[]
+    iter_count=0
+    contin=0
+    Q, R= qr_decomposition(A, method)
+    if vsh==1:
+        print("First of Q,R-decomp.. Q:")
+        print(Q)
+        print("R:")
+        print(R)
+        print("Sub diagonal:")
+        s=""
+        for i in range(1, m-1+1):
+            s=s+str(R[i+1-1][i-1])+" "
+        print(s)
+        print("diagonal:")
+        s=""
+        for i in range(1, m+1):
+            s=s+str(R[i-1][i-1])+" "
+        print(s)
+    A=np.dot(R, Q)
+    if vsh==1:
+        print("A:")
+        print(A)
+    for i in range(1, QIts+1):
+        Q, R= qr_decomposition(A, method)
+        if vsh==1:
+            print("Iter N "+str(i)+" of Q,R-decomp.. Q:")
+            print(Q)
+            print("R:")
+            print(R)
+            print("Sub diagonal:")
+            s=""
+            for i in range(1, m-1+1):
+                s=s+str(R[i+1-1][i-1])+" "
+            print(s)
+            print("diagonal:")
+            s=""
+            for i in range(1, m+1):
+                s=s+str(R[i-1][i-1])+" "
+            print(s)
+        A=np.dot(R, Q)
+        if vsh==1:
+            print("A:")
+            print(A)
+    for i in range(1, m+1):
+       eigenVals.append(A[i-1][i-1])
+    if vsh==1:
+        print("Answer: ", eigenVals)
+        print("FindEigenVals_RealOnly finishes working")
+    return eigenVals
+
+def FindEigenVals1(A, method='householder', eps=1e-7, MaxQIters=50, vsh=1):
+    if vsh==1:
+        print("FindEigenVals1 starts working")
+        print("Matrix given:")
+        print(A)
+    A = A.copy()
+    m, n = A.shape
+    eigenVals=[]
+    SubDiagPre=[]
+    SubDiagCur=[]
+    diffs=[]
+    iter_count=0
+    chkVal=0
+    contin=0
+    Q, R= qr_decomposition(A, method)
+    #A=np.dot(R, Q)
+    #if vsh==1:
+    #    print("First Q,R-decomp.. Q:")
+    #    print(Q)
+    #    print("R A:")
+    #    print(A)
+    #    print("Sub diagonal:")
+    #    print(SubDiagCur)
+    #    print("diagonal:")
+    #    s=""
+    #    for i in range(1, m+1):
+    #        s=s+str(A[i-1][i-1])+" "
+    #    print(s)
+    if vsh==1:
+        print("First Q,R-decomp.. Q:")
+        print(Q)
+        print("R:")
+        print(R)
+        print("Sub diagonal (to evaluate):")
+        s=""
+        for i in range(1, m-1+1):
+            s=s+str(R[i+1-1][i-1])+" "
+        print("diagonal (to evaluate):")
+        s=""
+        for i in range(1, m+1):
+            s=s+str(R[i-1][i-1])+" "
+        print(s)
+    A=np.dot(R, Q)
+    if vsh==1:
+        print("A:")
+        print(A)
+        print("Sub diagonal (really calc'd):")
+        s=""
+        for i in range(1, m-1+1):
+            s=s+str(A[i+1-1][i-1])+" "
+        print("diagonal (really calc'd):")
+        s=""
+        for i in range(1, m+1):
+            s=s+str(A[i-1][i-1])+" "
+        print(s)
+    for i in range(1, m-1+1):
+        SubDiagCur.append(A[i+1-1][i-1])
+    for i in range(1, m-1+1):
+        chkVal+=abs(A[i+1-1][i-1])
+    if vsh==1:
+        print("First Q,R-decomp.. Q:")
+        print(Q)
+        print("R A:")
+        print(A)
+        print("Sub diagonal:")
+        print(SubDiagCur)
+        print("diagonal:")
+        s=""
+        for i in range(1, m+1):
+            s=s+str(A[i-1][i-1])+" "
+        print(s)
+    if chkVal>eps:
+        if vsh==1:
+            print("sub-diagonal has non-zero vals")
+        contin=1
+        while contin:
+            SubDiagPre=copy.deepcopy(SubDiagCur)
+            SubDiagCur=[]
+            iter_count+=1
+            Q, R = qr_decomposition(A, method)
+            if vsh==1:
+                print("Iter"+str(iter_count)+" - Q, R-decomp. Q:")
+                print(Q)
+                print("R:")
+                print(R)
+                print("Sub diagonal (to evaluate):")
+                s=""
+                for i in range(1, m-1+1):
+                    s=s+str(R[i+1-1][i-1])+" "
+                print("diagonal (to evaluate):")
+                s=""
+                for i in range(1, m+1):
+                    s=s+str(R[i-1][i-1])+" "
+                print(s)
+            A=np.dot(R, Q)
+            chkVal=0
+            for i in range(1, m-1+1):
+                chkVal+=abs(A[i+1-1][i-1])
+            if chkVal>eps:
+                contin=0
+                for i in range(1, m-1+1):
+                    SubDiagCur.append(A[i+1-1][i-1])
+                    CurDiff=SubDiagCur[i-1]-SubDiagPre[i-1]
+                    diffs.append(CurDiff)
+                    if abs(CurDiff)>eps:
+                        contin=1
+                        if(vsh==1):
+                            print(str(SubDiagCur[i-1])+"-"+str(SubDiagPre[i-1])+"="+str(CurDiff)+">"+str(eps))
+                if vsh==1:
+                    #print("Iter"+str(iter_count)+" - Q, R-decomp. Q:")
+                    #print(Q)
+                    #print("R A:")
+                    #print(A)
+                    print("A:")
+                    print(A)
+                    print("Sub diagonal (really calc'd):")
+                    print(SubDiagCur)
+                    print("diagonal  (really calc'd):")
+                    s=""
+                    for i in range(1, m+1):
+                        s=s+str(A[i-1][i-1])+" "
+                    print(s)
+                if iter_count>=MaxQIters:
+                    contin=0
+            else:
+                contin=0
+                if vsh==1:
+                    print("sub-diagonal's values became zeros!")
+                    #print("Iter"+str(iter_count)+" - Q, R-decomp. Q:")
+                    #print(Q)
+                    #print("R A:")
+                    #print(A)
+                    print("A:")
+                    print(A)
+                    print("Sub diagonal (really calc'd):")
+                    print(SubDiagCur)
+                    print("diagonal  (really calc'd):")
+                    s=""
+                    for i in range(1, m+1):
+                        s=s+str(A[i-1][i-1])+" "
+                    print(s)
+                for i in range(1, m+1):
+                    eigenVals.append(A[i-1][i-1])
+            if contin==0:
+                pass#calc complex eigenvals by vals of 2 diags
+    else:
+        if vsh==1:
+            print("sub-diagonal's values are zeros (from first attempt of QR-decomp)!")
+        for i in range(1, m+1):
+            eigenVals.append(A[i-1][i-1])
+    if vsh==1:
+        print("Answer: ", eigenVals)
+        print("FindEigenVals1 finishes working")
+    return eigenVals
+
 # Ïנטלונ
+print("QR-decomposition:")
 A = np.array([[12.0, -51.0, 4.0, 1.0, 0.0],
               [6.0, 167.0, -68.0, 0.0, 2.0],
               [-4.0, 24.0, -41.0, 0.0, 0.0],
               [1.0, 0.0, 0.0, 2.0, 3.0]])
-
+print(A)
+print("By lib fn:")
+Q, R = np.linalg.qr(A)
+print("A:")
+print(A)
+print("Q:")
+print(Q)
+print("R:")
+print(R)
+print("BY HANDS")
+print("Householder")
 Q, R = qr_decomposition(A, method='householder')
 print("Q =\n", Q)
 print("R =\n", R)
-
+print("Givens")
+Q, R = qr_decomposition(A, method='givens')
+print("Q =\n", Q)
+print("R =\n", R)
+#print("Try exception")
+#Q, R = qr_decomposition(A, method='afonin')
+#print("Q =\n", Q)
+#print("R =\n", R)
+B = np.array([[12.0, -51.0,   4.0, 1.0],
+              [ 6.0, 167.0, -68.0, 0.0],
+              [-4.0,  24.0, -41.0, 0.0],
+              [ 1.0,   0.0,   0.0, 2.0]])
+print("B:")
+print(B)
+print("By lib fn:")
+vals, vecs = np.linalg.eig(B)
+print("vals: ", vals)
+print("vecs: ", vecs)
+print("BY HANDS")
+print("RealOnly")
+eigvas=FindEigenVals_RealOnly(B)
+print("Q =\n", Q)
+print("R =\n", R)
+print("eig val:")
+print(eigvas)
+print("RealOnly1")
+eigvas=FindEigenVals_RealOnly1(B)
+print("Q =\n", Q)
+print("R =\n", R)
+print("eig val:")
+print(eigvas)
+print("Full")
+eigvas=FindEigenVals1(B)
+print("eig vals:")
+print(eigvas)
