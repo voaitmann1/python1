@@ -6,9 +6,9 @@ arr=[1, 2, 3, 4, 5]
 
 print(arr)
 
-SwapVals(2,4)
-SwapVals(1,3)
-SwapVals(5,2)
+SwapVals(arr, 2,4)
+SwapVals(arr, 1,3)
+SwapVals(arr, 5,2)
 
 print(arr)
 
@@ -16,8 +16,8 @@ SortArray(arr, True)
 
 print(arr)
 
-QPoints=125#1250
-QSects=10#100
+QPoints=125#100590#1250#100590#125
+QSects=10#200#100#200#10
 #
 ##QPoints=len(signal)
 #QPairs=QPoints-1
@@ -83,4 +83,29 @@ QSects=10#100
 #print(rows)
 #print("====================================================================")
 #from MyPyVibroLib import MyEnvelopeBuilding_part1of3_SortPointsNumbersToSects_to2DArr
-RowNs=MyEnvelopeBuilding_part1of3_SortPointsNumbersToSects_to2DArr(QPoints, QSects, vsh=2)
+#vv
+#RowNs=MyEnvelopeBuilding_part1of3_SortPointsNumbersToSects_to2DArr(QPoints, QSects, vsh=2)
+#^^
+#
+#      1   2 3  4  5  6  7  8  9 10 11 12 13 14 
+arr1=[10, 8, 3, 2, 1, 4, 6, 5, 4, 5, 3, 2, 4, 3]
+
+Qelts=len(arr1)
+
+ts=[]
+
+print("Initial:")
+
+for i in range(1, Qelts+1):
+    ts.append(i*10)
+    print("N="+str(i)+" t="+str(ts[i-1])+" h="+str(arr1[i-1]))
+
+print("Selected:")
+
+Ns, t2s, Hs1 = ExcludeLowerPeaks(arr1, ts)
+
+QSel=len(t2s)
+
+for i in range(1, QSel+1):
+    print("N="+str(i)+"="+str(Ns[i-1])+" t="+str(t2s[i-1])+" h="+str(Hs1[i-1]) )
+

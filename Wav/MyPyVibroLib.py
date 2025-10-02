@@ -20,6 +20,63 @@ impactRangesHeadersRow=["tStart", "tFin"]
 
 #
 
+def FindPosInSucc(X, val):
+    isLess=0
+    isGreater=0
+    isWithin=0
+    equalN=0
+    lessN=0
+    if isinstance(X, list):
+        Q=len(X)
+        if Q>0:
+            if val<X[1-1]:
+                isLess=1
+            elif val>X[Q-1]:
+                isGreater=1
+            else:
+                isWithin=1
+                for N in range(1, Q+1):
+                    if val==X[N-1]:
+                        equalN=N
+                if equalN==0:
+                    for N in range(1, Q-1+1):
+                        if val>X[N-1] and val<X[N+1-1]:
+                            lessN=N
+    R=[["isLess", isLess],["isGreater", isGreater],["isWithin", isWithin],["equalN", equalN],["lessN", lessN]]
+    return R
+
+def LinInterp(X, Y, x):
+    y=0
+    Q=len(X)
+    pos=FindPosInSucc(X, x)
+    isLess=pos[1-1][2-1]
+    isGreater=pos[2-1][2-1]
+    isWithin=pos[3-1][2-1]
+    equalN=pos[4-1][2-1]
+    lessN=pos[5-1][2-1]
+    if equalN>0:
+       y=Y[equalN-1]
+    else:
+        if isLess!=0:
+            x1=X[1-1]
+            x2=X[2-1]
+            y1=Y[1-1]
+            y2=Y[2-1]
+        elif isGreater!=0:
+            x1=X[Q-1-1]
+            x2=X[Q-1]
+            y1=Y[Q-1-1]
+            y2=Y[Q-1]
+        else:#lessN!=0
+            x1=X[lessN-1]
+            x2=X[lessN+1-1]
+            y1=Y[lessN-1]
+            y2=Y[lessN+1-1]
+        k=(y2-y1)/(x2-x1)
+        y=k*(x-x1)+y1
+    return y
+            
+
 def FindExtremsOfArray(arr):
     if isinstance(arr, list) and len(arr)>0:
         mx=arr[1-1]
@@ -71,8 +128,6 @@ def SortArray(arr, AscNotDesc=True):
             #
         #
     #return arr
-
-    
 #
 
 def read_wav_safe(fullFileName, max_seconds=None):
@@ -110,7 +165,7 @@ def read_wav_safe(fullFileName, max_seconds=None):
             #print(str(n_channels)+" channels")
 
         data = data.astype(np.float32)/ np.iinfo(np.int16).max
-        return fs, data
+        return fs, data#wtf?
 
 #---
 
@@ -376,8 +431,11 @@ def compute_spectrum(x, fs=1000, method='fft', use_window=False, plot=True):
     fs - частота дискретизации
     method - 'fft' или 'dft'
     use_window - применять окно Hann
-    plot - строить график
+   plot - строить график
     """
+
+    print("spectrum fun #2")
+    
     if method == 'fft':
         freqs, amps = spectrum_fft(x, fs, use_window)
     elif method == 'dft':
@@ -413,6 +471,8 @@ def compute_spectrum(x, fs, use_window=False, use_mean=False, use_detrend=False,
     """
     Вычисление спектра сигнала.
     """
+
+    print("spectrum fun #2")
     x_proc = np.array(x, dtype=float)
 
     if use_mean:
@@ -578,22 +638,25 @@ def compute_envelope(signal):
     envelope = np.abs(analytic_signal)
     return envelope
 
-# 2. Функция спектра
-def compute_spectrum(signal, fs=1000, use_window=False):
-    """
-    Вычисление спектра сигнала
-    """
-    N = len(signal)
-    x_proc = np.array(signal, dtype=float)
-    
-    if use_window:
-        window = np.hanning(N)
-        x_proc *= window
-
-    X = np.fft.fft(x_proc)
-    freqs = np.fft.fftfreq(N, d=1/fs)[:N//2]
-    amps = 2 * np.abs(X[:N//2]) / N
-    return freqs, amps
+## 2. Функция спектра
+#def compute_spectrum(signal, fs=1000, use_window=False):
+#    """
+#    Вычисление спектра сигнала
+#    """
+#
+#    print("spectrum fun #3")
+#    
+#    N = len(signal)
+#    x_proc = np.array(signal, dtype=float)
+#    
+#    if use_window:
+#        window = np.hanning(N)
+#        x_proc *= window
+#
+#    X = np.fft.fft(x_proc)
+#    freqs = np.fft.fftfreq(N, d=1/fs)[:N//2]
+#    amps = 2 * np.abs(X[:N//2]) / N
+#    return freqs, amps
 
 # 3. Поиск пиков спектра с параметрами регулировки
 def find_spectrum_peaks(freqs, amps,
@@ -986,7 +1049,6 @@ def extract_modes_and_save(t, signal, fs, save_dir="results",
 #    plt.show()
 #
 
-
 #==============================================================================
     
 def MyEnvelopeBuilding_part1of3_SortPointsNumbersToSects_to2DArr(QPoints, QSects, vsh=0):
@@ -1008,7 +1070,8 @@ def MyEnvelopeBuilding_part1of3_SortPointsNumbersToSects_to2DArr(QPoints, QSects
         if vsh==1 or vsh==3:
             print("N="+str(N))
         row.append(N)
-        if N%QSects==0:
+        #if N%QSects==0 and N<QPoints:
+        if N%SectLenInt==0 and N<QPoints:
             if N<SectLenInt*QSects:
                 if vsh==1 or vsh==3:
                     print("row bound reached")
@@ -1213,7 +1276,269 @@ def MyEnvelopeBuilding_part3of3_BuildingStairs(signal, QSects, fs=1, vrnN_Integr
         print("Pt "+str(n)+" rowN="+str(i)+" N in row="+str(j)+" row lims: ("+str(rowsOfNs[i-1][1-1])+"..."+str(rowsOfNs[i-1][rowL-1])+") val="+str(val)+"="+str(Hs[n-1]))
     return Hs
 
-def MyEnvelopeBuilding_part4of3_BuildingCurve_NurInitialT(signal, QSects, fs=1, vrnN_Integr1_SortedMaxs2_Max3=3, percent=1, vsh=0):
+def MyEnvelopeBuilding_sumPart2of3_DefinePeakVals(signal, ts, QSects, fs=1, vrnN_Integr1_SortedMaxs2_Max3=2, percent=33, vsh=0):#new fs s'not f'IntegrOrMean
+    trs=[]
+    dt=ts[3]-ts[2]#1/fs
+    t0=ts[0]
+    t=t0-dt
+    QPoints=len(signal)
+    rowsOfNs=MyEnvelopeBuilding_part1of3_SortPointsNumbersToSects_to2DArr(QPoints, QSects, 0)
+    if vrnN_Integr1_SortedMaxs2_Max3==1:
+        rowsHs=MyEnvelopeBuilding_part2of3_IntegrOrMean(signal, QSects, fs)
+    elif vrnN_Integr1_SortedMaxs2_Max3==2:
+        rowsHs=MyEnvelopeBuilding_part2of3_SortMax(signal, QSects, percent=1, vsh=vsh)#33
+    elif vrnN_Integr1_SortedMaxs2_Max3==3:
+        rowsHs=MyEnvelopeBuilding_part2of3_FindMax(signal, QSects)
+    QRows=len(rowsOfNs)
+    for row in rowsOfNs:
+        N1=row[1-1]
+        t=ts[N1-1]
+        #t+=dt
+        #print("_t="+str(t))
+        trs.append(t)
+    if vsh!=0:
+        print("fun: len(trs)="+str(len(trs))+" len(hs)="+str(len(rowsHs)))
+    return trs, rowsHs
+
+def ExcludeLowerPeaks(peaksHs, trs, vsh=1):#new
+    QPeaks=len(peaksHs)
+    if vsh==1:
+        print("ExcludeLowerPeaks starts working. Qpeaks="+str(QPeaks))
+    Hs=[]
+    t2s=[]
+    Nps=[]
+    Hs.append(peaksHs[1-1])
+    Nps.append(1)
+    t2s.append(trs[1-1])
+    print("first selected value: N="+str(Nps[1-1])+" t="+str(t2s[1-1])+" h="+str(Hs[1-1]))
+    i=0#ob 1th V ecri
+    ContinExt=True
+    while ContinExt:
+        #for i in range(2, QPeaks-1+1):
+        i+=1
+        contin=True
+        if i==QPeaks-1:
+            ContinExt=False
+            contin=False
+        #
+        hi=peaksHs[i-1]
+        mx=peaksHs[i+1-1]
+        mxN=i+1
+        #mxN=i#no infinite cycke
+        #print("Checking: h[i="+str(i)+"]="+str(hi))
+        #j=i+1-1
+        j=i+1-1
+        MaxIsFirst=True
+        print("Let max be "+str(mx)+" (N "+str(mxN)+")")
+        while contin:
+            j+=1
+            if j==QPeaks:
+                #if j>=QPeaks:
+                contin=False
+                
+            #
+            hj=peaksHs[j-1]
+            #mxN=i+1
+            #print("compare with h[j="+str(j)+"]="+str(hj))
+            print("compare h[i="+str(i)+"]="+str(hi)+" with h[j="+str(j)+"]="+str(hj))
+            if hj>mx:
+                mx=hj
+                mxN=j
+                #contin=False
+                MaxIsFirst=False
+                print(str(hj)+" - it is local max ")
+                if mxN==QPeaks:
+                    ContinExt=False
+                #
+            #
+        if MaxIsFirst:
+            print("max is first: i="+str(i)+" max's N="+str(mxN)+" mx="+str(peaksHs[i+1-1])+"="+str(mx))
+        else:
+            print("max found at: N="+str(mxN)+" mx="+str(peaksHs[mxN-1])+"="+str(mx)+"- deleting all before")
+        #
+        Hs.append(peaksHs[mxN-1])
+        Nps.append(mxN)
+        t2s.append(trs[mxN-1])
+        i=mxN-1
+        #i=mxN
+        if i>=QPeaks-1:
+            ContinExt=False
+            contin=False
+        #
+    #
+    if vsh==1:
+        print("ExcludeLowerPeaks finishes working")
+    return Nps, t2s, Hs
+        
+            
+
+def MyEnvelopeBuilding_sumPart3of3_MakeEnvelopeCurveOfPeaksByRealT(peaksHs, trs, ts, type_Stairs0Line1=0, vsh=0):#new
+    peakQ=len(trs)
+    signalQ=len(ts)
+    print("peakQ="+str(peakQ)+" "+"signalQ="+str(signalQ))
+    Hs=[]
+    j1=1
+    N=0
+    if type_Stairs0Line1==0:
+        #for i in range(1, peakQ-1+1): #ce code sol ety arb, ma I n'arb, et I n'vid l'err 
+        #    if i==1:
+        #        #print("i="+str(i))
+        #        t1=0
+        #    else:
+        #        t1=trs[i-1]
+        #    if i==peakQ:
+        #        t2=ts[signalQ-1]+2
+        #    else:
+        #        t2=trs[i+1-1]
+        #    h=peaksHs[i-1]
+        #    contin=True
+        #    j=j1-1
+        #    while contin:
+        #        j+=1
+        #        N+=1
+        #        if j==signalQ:
+        #            contin=False
+        #        if i>=11 and j>=100588:
+        #            print("i="+str(i)+" j="+str(j))
+        #        t=ts[j-1]
+        #        ss="Np="+str(i)+" "+"t1="+str(t1)+" "+"t2="+str(t2)+" "+"j1="+str(j1)+" "+"j="+str(j)+" "+"N="+str(N)+" "+"t="+str(t)
+        #        if t>=t1 and t<t2:
+        #            Hs.append(h)
+        #            ss+=" t within range, h="+str(h)
+        #            j1=j+1
+        #        else:
+        #            ss+=" t not within range"
+        #            #break;#mab tic break dego ne nur ine, ma et ext cycle
+        #            contin=False
+        #            N-=1
+        #        print(ss)
+        #    #
+        j1=2
+        if vsh!=0:
+            print("signalQ="+str(signalQ)+" peakQ="+str(peakQ)+" ts1="+str(ts[0])+" tsL="+str(ts[len(ts)-1])+" trs1="+str(trs[0])+" trsL="+str(trs[len(trs)-1]) )
+        for i in range(1, signalQ+1):
+            t=ts[i-1]
+            ss="i="+str(i)+" t="+str(t)+" "
+            if t<trs[2-1]:
+                h=peaksHs[1-1]
+                found=1
+                ss+=" t<t2="+str(trs[2-1])+" "
+                if t<trs[1-1]:
+                    ss+="(t<t1="+str(trs[1-1])+"!)"+" "
+            elif t>=trs[peakQ-1]:
+                h=peaksHs[peakQ-1]
+                found=1
+                ss+=" t>=tL="+str(trs[peakQ-1])+" "
+            else:
+                contin=True
+                j=j1-1
+                while contin:
+                    found=0
+                    j+=1
+                    if j==peakQ-1:
+                        contin=False
+                    t1=trs[j-1]
+                    t2=trs[j+1-1]
+                    if t>=t1 and t<=t2:
+                        h=peaksHs[j-1]
+                        #j1=j+1
+                        j1=j#ja, n'ef, ma qob ne af ce?
+                        contin=False
+                        found=1
+                        ss+=" j="+str(j)+" t["+str(j)+"]="+str(t1)+"<= t= "+str(t)+"<= t["+str(j+1)+"]="+str(t2)+" j1="+str(j1)+" "
+                if found==0:
+                    ss+="Not found: t="+str(t)+" t2="+str(trs[2-1])+" tL="+str(trs[peakQ-1])+" "
+            ss+=" h="+str(h)
+            if vsh!=0:
+                print(ss)
+            Hs.append(h)
+        #
+    elif type_Stairs0Line1==1:
+        for i in range(1, signalQ+1):
+            t=ts[i-1]
+            h=LinInterp(trs, peaksHs, t)
+            Hs.append(h)
+        #
+    #
+    return Hs
+        
+
+def MyEnvelopeBuilding_part3of3_BuildingCurveLinApprox(signal, QSects, fs=1, vrnN_Integr1_SortedMaxs2_Max3=2, percent=33, vsh=0):
+    print("MyEnvelopeBuilding_part3of3_BuildingCurveLinApprox starts working")
+    QPoints=len(signal)
+    print("def rowsOfNs")
+    rowsOfNs=MyEnvelopeBuilding_part1of3_SortPointsNumbersToSects_to2DArr(QPoints, QSects, 0)
+    print("def rowsHs")
+    if vrnN_Integr1_SortedMaxs2_Max3==1:
+        rowsHs=MyEnvelopeBuilding_part2of3_IntegrOrMean(signal, QSects, fs)
+    elif vrnN_Integr1_SortedMaxs2_Max3==2:
+        rowsHs=MyEnvelopeBuilding_part2of3_SortMax(signal, QSects, percent=1, vsh=vsh)#33
+    elif vrnN_Integr1_SortedMaxs2_Max3==3:
+        rowsHs=MyEnvelopeBuilding_part2of3_FindMax(signal, QSects)
+    print("Forming row of ts of rowsHs row")
+    QRows=len(rowsOfNs)
+    print("signal length="+str(len(signal))+" "+"rowsHs length="+str(len(rowsHs))+" "+"rowsOfNs length="+str(len(rowsOfNs)))
+    trs=[]
+    for i in range(len(rowsOfNs)):
+        t=rowsOfNs[i][0]/fs
+        trs.append(t)
+        print("trs["+str(i)+"]="+str(trs[i]))
+    print("Forming row of ts of signal row")
+    dt=1/fs
+    ts=[]
+    for i in range(len(signal)):
+        t=i*dt
+        ts.append(t)
+        print("ts["+str(i)+"]="+str(ts[i]))
+    Hs=[]
+    print("Defining all Hs for all ts by interpolating")
+    for i in range(len(signal)):
+        t=ts[i]
+        h=LinInterp(trs, rowsHs, t)
+        Hs.append(h)
+        print(str(i+1)+") ts="+str(ts[i])+" Hs="+str(Hs[i]))
+    print("signal length="+str(len(signal))+" "+"rowsHs length="+str(len(rowsHs))+" "+"rowsOfNs length="+str(len(rowsOfNs)))
+    print("trs length="+str(len(trs))+" "+"rowsHs length="+str(len(rowsHs))+" ts length="+str(len(ts))+" "+"Hs length="+str(len(Hs)))
+    print("MyEnvelopeBuilding_part3of3_BuildingCurveLinApprox starts working")
+    return Hs
+        
+    
+#def MyEnvelopeBuilding_part4of3_BuildingCurve_NurInitialT
+def MyEnvelopeBuilding_part4of3_CalcCoefs_v1(Hs, Ts, do_lnT=False, do_lnY=True, vsh=1):
+    QPoints=len(Hs)
+    if vsh!=0:
+        print("MyEnvelopeBuilding_part4of3_CalcCoefs_v1 starts working. Elaborating row of values: "+str(QPoints))
+    SumX=0
+    SumY=0
+    SumXY=0
+    SumXp2=0
+    for i in range(QPoints):
+        val_t=Ts[i]-Ts[0]
+        #if do_lnT:
+        #    val_t=np.log(val_t)
+        val_y=Hs[i]
+        if do_lnY:
+            val_y=math.log(val_y+1e-8)#val_x=math.log(val_t) - all ce arb id'y
+        #trs.append(val_t)
+        #    trf.append(rowsOfNs[i][L-1])
+        #MeanX+=val_t
+        #MeanY+=val_x
+        SumX+=val_t
+        SumY+=val_y
+        SumXY+=val_t*val_y
+        SumXp2+=val_t*val_t
+    numerator=QPoints*SumXY-SumX*SumY
+    denominator=QPoints*SumXp2-SumX*SumX
+    beta=numerator/denominator
+    alfa = (SumY - beta*SumX)/QPoints
+    if vsh!=0:
+        print("SumX="+str(SumX)+" "+"SumY="+str(SumY)+" "+"SumXY="+str(SumXY)+" "+"SumXp2="+str(SumXp2))
+        print("alfa="+str(alfa)+" "+"beta="+str(beta)+" ")
+        print("MyEnvelopeBuilding_part4of3_CalcCoefs_v1 finishes working")
+    return alfa, beta
+
+ef MyEnvelopeBuilding_part4of3_CalcCoefs(signal, QSects, fs=1, vrnN_Integr1_SortedMaxs2_Max3=3, percent=1, do_lnT=False, do_lnX=True, vsh=0):
+    #this function is not for use - it has incorrect formulas
     QPoints=len(signal)
     rowsOfNs=MyEnvelopeBuilding_part1of3_SortPointsNumbersToSects_to2DArr(QPoints, QSects, 0)
     if vrnN_Integr1_SortedMaxs2_Max3==1:
@@ -1229,11 +1554,16 @@ def MyEnvelopeBuilding_part4of3_BuildingCurve_NurInitialT(signal, QSects, fs=1, 
     MeanY=0
     for i in range(QRows):
         L=len(rowsOfNs[i])
-        trs.append(rowsOfNs[i][1-1])
+        val_t=rowsOfNs[i][1-1]
+        if do_lnT:
+            val_t=np.log(val_t)
+        val_x=rowsHs[i]
+        if do_lnX:
+            val_x=math.log(val_x+1e-8)#val_x=math.log(val_t) - all ce arb id'y
+        trs.append(val_t)
         #    trf.append(rowsOfNs[i][L-1])
-        MeanX+=rowsOfNs[i][1-1]
-        MeanY+=rowsHs[i]
-    #return trs, trf, rowsHs
+        MeanX+=val_t
+        MeanY+=val_x
     MeanX/=QRows
     MeanY/=QRows
     numerator=0
@@ -1241,10 +1571,115 @@ def MyEnvelopeBuilding_part4of3_BuildingCurve_NurInitialT(signal, QSects, fs=1, 
     m2=0
     denominator=0
     for i in range(QRows):
-       m1= trs[i] - MeanX
-       m2= rowsHs[i] - MeanY
-       numerator+=(m1*m2)
-       denominator+=(m1*m1)
+        val_t=rowsOfNs[i][1-1]
+        if do_lnT:
+            val_t=np.log(val_t)
+        m1= val_t - MeanX
+        val_x=rowsHs[i]
+        if do_lnX:
+            val_x=math.log(val_x)
+        m2= rowsHs[i] - MeanY
+    numerator+=(m1*m2)
+    denominator+=(m1*m1)
     beta=numerator/denominator
     alfa = MeanY - beta*MeanX
     return alfa, beta
+
+#def exponential_func(x, a, b, c):
+#    return a*np.exp(b*x)+c
+#
+#def MyEnvelopeBuilding_part4of3_CalcCoefs_NeLin(T, Y, a, b, c):
+#    p0_guess=(a, b, c)
+#    T=np.array(T)
+#    Y=np.array(Y)
+#    popt, pcov=curve_fit(exponential_func, T, X, p0-p0_guess)
+#    a_opt, b_opt, c_opt=popt
+#    return a_opt, b_opt, c_opt
+
+def exponential_func(x, al, dc, c):
+    return al*np.exp(dc*x)+c
+
+def exponential_envel_theor(x, P):
+    al=P[1-1]
+    dc=P[2-1]
+    #c =P[3-1]
+    return al*np.exp(-dc*x)
+
+def exp_envel_regr(P0, ts, Xs):
+    QVals=len(ts)
+    s=0
+    for i in len(QVals):
+        t=ts[i]
+        ye=Xs[i]
+        yt=exponential_envel_theor(t, P0)
+        c=(yt-ye)*(yt-ye)
+        s+=c
+    return s
+
+def FuncToApprox(x, func, X):
+    return func(x, X)
+
+def MyEnvelopeBuilding_part4of3_CalcCoefs_NeLin_MyByLib(T, X, exp_envel_regr, al, k):
+    iniGuess=np.array([al, k])
+    params=fmin_powell(regr_fn, IniGuess)
+
+def MyEnvelopeBuilding_part4of3_CalcCoefs_NeLinLib(T, Y, al, dc, c):
+    p0_guess=(al, dc, c)
+    T=np.array(T)
+    Y=np.array(Y)
+    popt, pcov = curve_fit(exponential_func, T, X, p0=p0_guess)
+    al_opt, dc_opt, c_opt = popt
+    return al_opt, dc_opt, c_opt
+
+
+def MyFindFreqsPeaks(freqs, ampls, QForPeak=50, vsh=1):
+    QFreqs=len(ampls)
+    QBefore=QForPeak
+    QAfter=QForPeak
+    if vsh!=0:
+        print("MyFindPeaks starts working: QFreqs="+str(QFreqs)+" QForPeak="+str(QForPeak))
+    peaks=[]
+    peaksNs=[]
+    peakFreqs=[]
+    for N in range(1, QFreqs-1+1):
+        fn=ampls[N-1]
+        if vsh!=0:
+            print("f[N="+str(N)+"]="+str(fn))
+        NL1=N-QForPeak
+        NL2=N-1
+        NR1=N+1
+        NR2=N+QForPeak
+        if N<QForPeak:
+            QBefore=N
+            NL1=1
+        if N>QFreqs-QForPeak:
+            QAfrer=QFreqs-N
+            NR2=QFreqs
+        #if N==QFreqs:
+        #    NR1
+        if vsh!=0:
+            print(" NL1="+str(NL1)+" NL2="+str(NL2)+" NR1="+str(NR1)+" NR2="+str(NR2))
+        mxL=ampls[NL1-1]
+        for j in range(NL1, NL2+1):
+            f=ampls[j-1]
+            if j==NL1 or (j>NL1 and f>mxL):
+                mxL=f
+        mxR=ampls[NR1-1]
+        for j in range(NR1, NR2+1):
+            f=ampls[j-1]
+            if j==NR1 or (j>NR1 and f>mxR):
+                mxR=f
+        if vsh!=0:
+            print("maxn ampl of f("+str(NL1)+"..."+str(NL2)+")="+str(mxL)+"; max ampl of f("+str(NR1)+"..."+str(NR2)+")="+str(mxR))
+        if fn>=mxL and fn>=mxR:
+            peakN=N
+            peaks.append(fn)
+            peaksNs.append(N)
+            peakFreqs.append(freqs[N-1])
+        else:
+            if vsh!=0:
+                print(str(fn)+" is not a peak at "+str(NL1)+" ... "+str(NR2))
+    return peaksNs, peakFreqs, peaks
+        
+        
+            

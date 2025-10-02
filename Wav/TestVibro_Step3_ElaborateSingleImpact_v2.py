@@ -1,5 +1,5 @@
 from MyPyVibroLib import *
-
+#
 SignalCharFileOwnName="FileChar.csv"
 fileOwnNames=["051_1_M", "051-2"]
 fileEnding="_signal_SingleImpactRange.csv"
@@ -25,7 +25,7 @@ print("trying to read "+filenames[2-1])
 ts, si2, en2  = read_SignalAndEnergy_csv(filenames[2-1])
 print(filenames[2-1]+" done, "+str(len(si2))+" vals read")
 #
-tHBnd=0#7#if tHBnd==7 so len(en1)=67200, len(env1)=66800
+tHBnd=4#0#4#7#if tHBnd==7 so len(en1)=67200, len(env1)=66800
 # 67000=67000 - ignoring this point
 # 67200=6700 - ignoring this point  - this was written thrice
 if tHBnd!=0:
@@ -172,30 +172,35 @@ plot_several1([
     #=============================================================================
 print("len(en1="+str(len(en1))+" len(en2="+str(len(en2))+" len(enS="+str(len(enS)))
 QPoints=len(en1)
-QSects=200
+QSects=50#200
 vsh=0#1 this 67000, 67200, 66800
 #Ns=MyEnvelopeBuilding_part1of3_SortPointsNumbersToSects_to2DArr(QPoints, QSects, vsh=0)
 #Hs=MyEnvelopeBuilding_part3of3_BuildingStairs(en1, QSects)#, fs)
 #print("len(en1="+str(len(en1))+" len(en2="+str(len(en2))+" len(enS="+str(len(enS))+" len(Hs)="+str(len(Hs)))#+" len(Hs[0])="+str(len(Hs[0])))
 
-env1=MyEnvelopeBuilding_part3of3_BuildingStairs(en1, QSects, fs=1, vrnN_Integr1_SortedMaxs2_Max3=3, percent=1, vsh=vsh) # True False
-env2=MyEnvelopeBuilding_part3of3_BuildingStairs(en2, QSects, fs=1, vrnN_Integr1_SortedMaxs2_Max3=3, percent=1, vsh=vsh)
-envS=MyEnvelopeBuilding_part3of3_BuildingStairs(enS, QSects, fs=1, vrnN_Integr1_SortedMaxs2_Max3=3, percent=1, vsh=vsh)
+#Hs1=
+
+enve1=MyEnvelopeBuilding_part3of3_BuildingStairs(en1, QSects, fs=1, vrnN_Integr1_SortedMaxs2_Max3=3, percent=1, vsh=vsh) # True False
+#enve1 = MyEnvelopeBuilding_part3of3_BuildingCurveLinApprox(en1, QSects, fs)
+enve2=MyEnvelopeBuilding_part3of3_BuildingStairs(en2, QSects, fs=1, vrnN_Integr1_SortedMaxs2_Max3=3, percent=1, vsh=vsh)
+#enve2 = MyEnvelopeBuilding_part3of3_BuildingCurveLinApprox(en2, QSects, fs)
+enveS=MyEnvelopeBuilding_part3of3_BuildingStairs(enS, QSects, fs=1, vrnN_Integr1_SortedMaxs2_Max3=3, percent=1, vsh=vsh)
+#enveS = MyEnvelopeBuilding_part3of3_BuildingCurveLinApprox(en2, QSects, fs)
 print("len(en1="+str(len(en1))+" len(env1="+str(len(env1)))
 
-A01=env1[0]
-A02=env2[0]
-A0S=envS[0]
+A01=enve1[0]
+A02=enve2[0]
+A0S=enveS[0]
 
 plot_several1([
                 [
-                   [(ts, en1), (ts, env1)], 1
+                   [(ts, en1), (ts, enve1)], 1
                 ],
                 [
-                   [(ts, en2), (ts, env2)], 1
+                   [(ts, en2), (ts, enve2)], 1
                 ],
                 [
-                   [(ts, enS), (ts, envS)], 1
+                   [(ts, enS), (ts, enveS)], 1
                 ]
               ],
               [
@@ -216,7 +221,7 @@ vsh=0
 
 print("Signal Energy - Sensor 1")
 
-alfa1, beta1 = MyEnvelopeBuilding_part4of3_BuildingCurve_NurInitialT(env1, QSects, fs)
+alfa1, beta1 = MyEnvelopeBuilding_part4of3_CalcCoefs(enve1, QSects, fs)
 
 #A01=np.exp(alfa1)
 delta1 = -beta1
@@ -225,7 +230,7 @@ print("alfa1="+str(alfa1)+" beta1="+str(beta1)+" A01="+str(A01)+" delta1="+str(d
 
 print("Signal Energy - Sensor 2")
 
-alfa2, beta2 = MyEnvelopeBuilding_part4of3_BuildingCurve_NurInitialT(env2, QSects, fs)
+alfa2, beta2 = MyEnvelopeBuilding_part4of3_CalcCoefs(enve2, QSects, fs)
 
 #A02=np.exp(alfa2)
 delta2 = -beta2
@@ -233,7 +238,7 @@ delta2 = -beta2
 print("alfa2="+str(alfa2)+" beta2="+str(beta2)+" A02="+str(A02)+" delta2="+str(delta2))
 
 print("Signal Energy - Sum")
-alfaS, betaS = MyEnvelopeBuilding_part4of3_BuildingCurve_NurInitialT(envS, QSects, fs)
+alfaS, betaS = MyEnvelopeBuilding_part4of3_CalcCoefs(enveS, QSects, fs)
 
 #A0S=np.exp(alfaS)
 deltaS = -betaS
@@ -267,30 +272,54 @@ print("alfa2="+str(alfa2)+" beta2="+str(beta2)+" A02="+str(A02)+" delta2="+str(d
 print("alfaS="+str(alfaS)+" betaS="+str(betaS)+" A0S="+str(A0S)+" deltaS="+str(deltaS))
 
       
+#plot_several1([
+#                [
+#                   [(ts, en1), (ts, env1)], 1
+#                ],
+#                [
+#                   [(ts, en2), (ts, env2)], 1
+#                ],
+#                [
+#                   [(ts, enS), (ts, envS)], 1
+#                ]
+#              ],
+#              [
+#                ["t, с", "Энергия сигнала", "Огибающая"],                  
+#                ["t, с", "Энергия сигнала", "Огибающая"],
+#                ["t, с", "Энергия сигнала", "Огибающая"]
+#              ],
+#             [
+#               [ {"color":"green"}, {"color":"red"}],
+#                [ {"color":"green"}, {"color":"red"}],
+#                [ {"color":"green"}, {"color":"red"}]
+#              ],
+#              GraphName
+#             )
+
+
 plot_several1([
                 [
-                   [(ts, en1), (ts, env1)], 1
+                   [(ts, en1), (ts, enve1), (ts, env1)], 1
                 ],
                 [
-                   [(ts, en2), (ts, env2)], 1
+                   [(ts, en2), (ts, enve2), (ts, env2)], 1
                 ],
                 [
-                   [(ts, enS), (ts, envS)], 1
+                   [(ts, enS), (ts, enveS), (ts, envS)], 1
                 ]
               ],
               [
-                ["t, с", "Энергия сигнала", "Огибающая"],                  
-                ["t, с", "Энергия сигнала", "Огибающая"],
-                ["t, с", "Энергия сигнала", "Огибающая"]
+                ["t, с", "Энергия сигнала", "Огибающая", "Аппроксимация: decr="+str(-beta1)],                  
+                ["t, с", "Энергия сигнала", "Огибающая", "Аппроксимация: decr="+str(-beta2)],
+                ["t, с", "Энергия сигнала", "Огибающая", "Аппроксимация: decr="+str(-betaS)]
               ],
              [
-               [ {"color":"green"}, {"color":"red"}],
-                [ {"color":"green"}, {"color":"red"}],
-                [ {"color":"green"}, {"color":"red"}]
+               [ {"color":"green"}, {"color":"red"}, {"color":"blue"}],
+                [ {"color":"green"}, {"color":"red"}, {"color":"blue"}],
+                [ {"color":"green"}, {"color":"red"}, {"color":"blue"}]
               ],
               GraphName
              )
-
 
 
 
