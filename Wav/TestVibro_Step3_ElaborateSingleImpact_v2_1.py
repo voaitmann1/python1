@@ -5,7 +5,7 @@ from MyPyVibroLib import *
 SignalCharFileOwnName="FileChar.csv"
 fileOwnNames=["051_1_M", "051-2"]
 fileEnding="_signal_SingleImpactRange.csv"
-filePath="D:\\MyFilesCur\\MyPrgs\\Python\\Wav"
+filePath="C:\\Users\\user\\Documents\\MyPrgs\\Python\\Wav"
 filePathIniData=filePath+"\\"+"assets"#+"\\"+"IniData"
 filePathResults=filePath+"\\"+"assets"#+"\\"+"Results"
 SignalCharFileFullName=filePathIniData+"\\"+SignalCharFileOwnName
@@ -27,7 +27,7 @@ print("trying to read "+filenames[2-1])
 ts, si2, en2 = read_SignalAndEnergy_csv(filenames[2-1])
 print(filenames[2-1]+" done, "+str(len(si2))+" vals read")
 #
-tHBnd=4#0#4#7#if tHBnd==7 so len(en1)=67200, len(env1)=66800
+tHBnd=11.5#0#4#7#if tHBnd==7 so len(en1)=67200, len(env1)=66800
 
 if tHBnd!=0:
     indexHB=int(tHBnd*fs)
@@ -231,8 +231,15 @@ if do_ExcludeLowerPeaks:
     print("stairs calc'd successfully")
     #
     print("Peaks of envelope: N, T, H1, H2, HS")
+     
+    #for i in range(len(Hs1)):
+    #    print(str(i+1)+" "+str(trs1[i])+" "+str(Hs1[i])+" "+str(Hs2[i])+" "+str(HsS[i]))
     for i in range(len(Hs1)):
-        print(str(i+1)+" "+str(trs1[i])+" "+str(Hs1[i])+" "+str(Hs2[i])+" "+str(HsS[i])) 
+        print(str(i+1)+" "+str(trs1[i])+" "+str(Hs1[i]))
+    for i in range(len(Hs2)):
+        print(str(i+1)+" "+str(trs2[i])+" "+str(Hs2[i]))
+    for i in range(len(HsS)):
+        print(str(i+1)+" "+str(trsS[i])+" "+str(HsS[i])) 
     #
     GraphName="Энергия сигналов и огибающая (исключены провалы) - файлы "+fileOwnNames[1-1]+" и "+fileOwnNames[2-1]
     #
@@ -318,7 +325,7 @@ print("alfa1="+str(alfa1)+" beta1="+str(beta1)+" A01="+str(A01)+" delta1="+str(d
 print("alfa2="+str(alfa2)+" beta2="+str(beta2)+" A02="+str(A02)+" delta2="+str(delta2))
 print("alfaS="+str(alfaS)+" betaS="+str(betaS)+" A0S="+str(A0S)+" deltaS="+str(deltaS))
 
-GraphName="Энергия сигналов, ступенчатая огибающая и аппроксимация экспонентой с вычислением и отнолражением декремента затухания - файлы "+fileOwnNames[1-1]+" и "+fileOwnNames[2-1]
+GraphName="Энергия сигналов, ступенчатая огибающая и аппроксимация экспонентой с вычислением и отображением декремента затухания - файлы "+fileOwnNames[1-1]+" и "+fileOwnNames[2-1]
 
 plot_several1([
                 [

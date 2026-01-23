@@ -12,6 +12,8 @@ from scipy.optimize import curve_fit
 #
 from scipy.signal import butter, filtfilt, hilbert
 import copy
+
+import wave#
 #---
 
 signalFileHeader=["Time_s", "Signal", "Energy"]
@@ -130,14 +132,102 @@ def SortArray(arr, AscNotDesc=True):
     #return arr
 #
 
+def read_csv_of_files_and_channels(fullFileName):
+    #PathToNamesFile="C:\\Users\\V\\Documents\\MyPrgs\\Python\\Wav\\data"
+    #this function is universal uz evot QForSnglFile et QBefore
+    fileOwnNames=[]
+    fileOwnNames_noExt=[]
+    channels=[]
+    #with open(PathToNamesFile+"\\FolderAndFiles.csv", newline='') as f:
+    with open(fullFileName, newline='') as f:
+        reader = csv.DictReader(f)
+        LineN=0
+        for row in reader:
+            LineN+=1
+            if LineN==1:
+                #filePath=row[2-1]
+                filePath=row["Value"]
+            elif LineN==2:
+                #QFiles=int(row[2-1])
+                QFiles=int(row["Value"])
+            #elif LineN>2:
+            #    #fileOwnNames.append(row[2-1]+".csv")
+            #    fileOwnNames.append(row["Value"]+".wav")
+            else:
+                QBefore=2#filePath and QFiles
+                QForSnglFile=2#File name and Q channels
+                SubN=(LineN-QBefore)%QForSnglFile
+                if SubN==0:
+                    SubN=QForSnglFile
+                #FileN=(LineN-QBefore+SubN)/QForSnglFile
+                FileN=(LineN-QBefore+QForSnglFile-SubN)/QForSnglFile
+                FileN=int((LineN-QBefore+QForSnglFile-SubN)/QForSnglFile)
+                if SubN==1:#filename
+                    fname=row["Value"]
+                    fileOwnNames_noExt.append(fname)
+                    fileOwnNames.append(fname+".wav")
+                    print("LineN "+str(LineN)+" File N "+str(FileN)+" file name: "+fname)
+                elif SubN==QForSnglFile:#factic 2 - QChannels
+                    n_channel=int(row["Value"])
+                    channels.append(n_channel)
+                    print("LineN "+str(LineN)+" File N "+str(FileN)+" channels: "+str(n_channel))
+    return filePath, QFiles, fileOwnNames_noExt, channels
+
 def read_wav_safe(fullFileName, max_seconds=None):
+    print("read_wav_safe starts working")
+    print("reading: "+fullFileName)
     try:
         fs, data=wavfile.read(fullFileName)
         #norm'g if data s'numoz
         if np.issubdtype(data.dtype, np.integer):
             max_val= np.iinfo(data.dtype).max
-            data=data.astype(np.float32)
+            data=data.astype(np.float32)#div to max?
         return fs, data
+    except Exception as e:
+        print("Error reading file "+str(e))
+        print("trying to read via wave")
+        #with wave.open(fileName, "rb") as wf:#os not l'methods __enter__ et __exit__, so n'arb
+        print("reading: "+fullFileName)
+        wf=wave.open(fullFileName, "rb")
+        fs=wf.getframerate()
+        n_channels = wf.getnchannels()
+        n_frames = wf.getnframes()
+
+        if max_seconds is not None:
+            #data = data.reshape(-1, n_channels)
+            n_frames = min(n_frames, int(fs * max_seconds))
+
+        raw = wf.readframes(n_frames)
+
+        wf.close()#ute nur uz py 2.7 ob in py 3 to obj ha attr __exit__
+          
+        data = np.frombuffer(raw,dtype = np.int16)
+
+        if n_channels >1:
+            data = data.reshape(-1, n_channels)
+            #print(str(n_channels)+" channels")
+        else:
+            pass
+            #print(str(n_channels)+" channels")
+
+        data = data.astype(np.float32)/ np.iinfo(np.int16).max
+        return fs, data#wtf?
+
+def read_wav_safe_1(fullFileName, max_seconds=None, channel=None):
+    try:
+        fs, data=wavfile.read(fullFileName)
+        #norm'g if data s'numoz
+        if np.issubdtype(data.dtype, np.integer):
+            max_val= np.iinfo(data.dtype).max
+            data=data.astype(np.float32)#div to max?
+        if data.ndim > 1:
+            n_channels = data.shape[1]
+            if channel is not None:
+                if 0 <= channel < n_channels:
+                    data = data[:, channel]
+                else:
+                    raise ValueError(f"Недопустимый номер канала: {channel}, всего каналов: {n_channels}")
+        return fs, n_channels, data
     except Exception as e:
         print("Error reading file "+str(e))
         print("trying to read via wave")
@@ -165,7 +255,61 @@ def read_wav_safe(fullFileName, max_seconds=None):
             #print(str(n_channels)+" channels")
 
         data = data.astype(np.float32)/ np.iinfo(np.int16).max
-        return fs, data#wtf?
+
+        if channel is not None:
+            if 0 <= channel < n_channels:
+                data = data[:, channel]
+            else:
+                raise ValueError(f"Недопустимый номер канала: {channel}, всего каналов: {n_channels}")
+        
+        return fs, n_channels, data#wtf?
+    #return fs, data#wtf?
+
+def read_wav_safe_2(fullFileName, max_seconds=None, channel=None):
+    try:
+        fs, data=wavfile.read(fullFileName)
+        #norm'g if data s'numoz
+        if np.issubdtype(data.dtype, np.integer):
+            #max_val= np.iinfo(data.dtype).max
+            data=data.astype(np.float32)/np.iinfo(data.dtype).max
+        # Если задан канал
+        if data.ndim > 1:
+            n_channels = data.shape[1]
+            if channel is not None:
+                if 0 <= channel < n_channels:
+                    data = data[:, channel]
+                else:
+                    raise ValueError(f"Недопустимый номер канала: {channel}, всего каналов: {n_channels}")
+        else:
+            n_channels = 1#data.shape[1]
+        return fs, n_channels, data
+    except Exception as e:
+        print("Error reading file "+str(e))
+        print("trying to read via wave")
+        #with wave.open(fileName, "rb") as wf:#os not l'methods __enter__ et __exit__, so n'arb
+        wf=wave.open(fullFileName, "rb")
+        fs=wf.getframerate()
+        n_channels = wf.getnchannels()
+        n_frames = wf.getnframes()
+
+        if max_seconds is not None:
+            #data = data.reshape(-1, n_channels)
+            n_frames = min(n_frames, int(fs * max_seconds))
+
+        raw = wf.readframes(n_frames)
+
+        wf.close()#ute nur uz py 2.7 ob in py 3 to obj ha attr __exit__
+          
+        data = np.frombuffer(raw, dtype=np.int16).astype(np.float32)
+        data = data.reshape(-1, n_channels)
+        data /= np.iinfo(np.int16).max
+
+        if channel is not None:
+            if 0 <= channel < n_channels:
+                data = data[:, channel]
+            else:
+                raise ValueError(f"Недопустимый номер канала: {channel}, всего каналов: {n_channels}")
+        return fs, n_channels, data
 
 #---
 
@@ -177,6 +321,16 @@ def read_wav_and_calc_t(filename):
 
     t = np.arange(len(data)) / fs
     return t, data, fs
+
+def read_wav_and_calc_t_1(filename, max_seconds=None):
+    #fs, data = wavfile.read(filename)
+    fs, n_channels, data = read_wav_safe_2(filename, max_seconds)
+    if data.ndim > 1:
+        data1 = data[:,0]  # первый канал, если стерео
+    else:
+        data1=copy.deepcopy(data)
+    t = np.arange(len(data1)) / fs
+    return t, n_channels, data, fs
     
 
 def read_wav_and_save_csv(filename):# not used
@@ -227,6 +381,38 @@ def SaveToCsv(csv_filename, headerRow, data2D):
             #writer.writerow([t[i], data[i]])
         writer.writerows(data2D)
 #------------------------------------------------------------
+def ReadAndFindQChannels(filename):#ab single csv for all channels
+    QChannels=0
+    with open(filename, newline='') as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            L=len(row)
+            QChannels=(L-1)/2
+    return QChannels
+
+def read_signal_csv(filename, channelN=None):
+    times = []
+    values = []
+    if channelN==None:
+        with open(filename, newline='') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                times.append(float(row["Time_s"]))
+                values.append(float(row["Signal"]))
+            #
+        #
+    else:
+        with open(filename, newline='') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                times.append(float(row["Time_s"]))
+                signal_header="Signal_chN"+str(channelN)
+                values.append(float(row[signal_header]))
+            #
+        #
+    return np.array(times), np.array(values)
+
+#-------------------------------------------------------------
 def read_signal_csv(filename):
     times = []
     values = []
@@ -249,6 +435,16 @@ def read_SignalAndEnergy_csv(filename):
             energy.append(float(row["Energy"]))
     return np.array(times), np.array(signal), np.array(energy)
 
+def extractRangeFromSignal(times, signal, energy, fs, tLB, tHB):#new, n'test'd
+    QPoints=len(times)
+    indexLB=0
+    indexHB=QPoints-1
+    if tLB>=times[0] and tHB<=times[QPoints-1]:
+        indexLB=tLB*fs
+        indexHB=tHB*fs
+    return times[indexLB:indexHB+1], signal[indexLB:indexHB+1], energy[indexLB:indexHB+1]
+    
+
 def read_impact_bounds(filename):
     impacts = []
     with open(filename, newline='') as f:
@@ -265,7 +461,8 @@ def read_FileChars(filename):
             fileChars.append((int(row["ImpactID"]), float(row["StartTime_s"]), float(row["EndTime_s"])))
     return fileChars
 
-def ReadDiscretFreq(filename):
+#fileCharsHeadersRow
+def ReadDiscretFreq(filename):#arb'te co #old fn
     with open(filename, newline='') as f:
         reader = csv.DictReader(f)#all rows
         for row in reader:
@@ -275,8 +472,28 @@ def ReadDiscretFreq(filename):
             tm=float(row[fileCharsHeadersRow[4-1]])
             es=float(row[fileCharsHeadersRow[5-1]])
             break
-    #return fs
+#    #return fs
     return fN, fnm, fs, tm, es
+
+def ReadIniDataNamesAndFreq(filename):
+    fileOwnNames=[]
+    tms=[]
+    ess=[]
+    with open(filename, newline='') as f:
+        reader = csv.DictReader(f)#all rows
+        for row in reader:
+            fN=int(row[fileCharsHeadersRow[1-1]])
+            fnm=row[fileCharsHeadersRow[2-1]]
+            fs=float(row[fileCharsHeadersRow[3-1]])
+            tm=float(row[fileCharsHeadersRow[4-1]])
+            es=float(row[fileCharsHeadersRow[5-1]])
+            #
+            fileOwnNames.append(fnm)
+            tms.append(tm)
+            ess.append(es)
+    #return fs
+    #return fN, fnm, fs, tm, es
+    return fileOwnNames, fs, tms, ess
 #------------------------------------------------------------
 def parabolic_interpolation(k, A):
     # k - индекс пика, A - массив амплитуд
@@ -494,6 +711,13 @@ def compute_spectrum(x, fs, use_window=False, use_mean=False, use_detrend=False,
     freqs = np.fft.fftfreq(N, d=1/fs)[:N//2]
 
     return freqs, amps
+
+
+#
+# new 
+#
+
+
 
 # ------------------------------
 # 2. Поиск пиков в спектре
@@ -1537,7 +1761,7 @@ def MyEnvelopeBuilding_part4of3_CalcCoefs_v1(Hs, Ts, do_lnT=False, do_lnY=True, 
         print("MyEnvelopeBuilding_part4of3_CalcCoefs_v1 finishes working")
     return alfa, beta
 
-ef MyEnvelopeBuilding_part4of3_CalcCoefs(signal, QSects, fs=1, vrnN_Integr1_SortedMaxs2_Max3=3, percent=1, do_lnT=False, do_lnX=True, vsh=0):
+def MyEnvelopeBuilding_part4of3_CalcCoefs(signal, QSects, fs=1, vrnN_Integr1_SortedMaxs2_Max3=3, percent=1, do_lnT=False, do_lnX=True, vsh=0):
     #this function is not for use - it has incorrect formulas
     QPoints=len(signal)
     rowsOfNs=MyEnvelopeBuilding_part1of3_SortPointsNumbersToSects_to2DArr(QPoints, QSects, 0)
@@ -1681,5 +1905,793 @@ def MyFindFreqsPeaks(freqs, ampls, QForPeak=50, vsh=1):
                 print(str(fn)+" is not a peak at "+str(NL1)+" ... "+str(NR2))
     return peaksNs, peakFreqs, peaks
         
+      
+def FindImpactBounds(ts, signal, fs, tSectHalf=4, vsh=0):#not tested
+    if vsh==1:
+        print("FindImpactBounds starts working")
+    #
+    boundsNs=[]
+    boundsXs=[]
+    boundsTs=[]
+    bounds=[]
+    section=[]
+    dt=1/fs
+    t0=ts[0]
+    tMax=ts[-1]
+    tLast=tMax-tSectHalf
+    NLast=int(tLast/dt)
+    tFirst=10*dt+tSectHalf
+    QPointsInSectHalf=int(tSectHalf/dt)
+    NFirst=10+QPointsInSectHalf
+    N1=NFirst-QPointsInSectHalf
+    if vsh==1:
+        print(" t0="+str(t0)+" tmax="+str(tMax)+" fs="+str(fs)+" dt="+str(dt)+" QPoints="+len(ts))
+        print(" tSectHalf="+str(tSectHalf)+" QPointsInSectHalf="+str(QPointsInSectHalf))
+        print(" Starting from: N1="+str(NFirst)+" t1="+str(ts[NFirst-1]))
+    #
+    while N1<NLast:
+        #N1+=1
+        N2=N1+2*QPointsInSectHalf
+        t1=ts[N1-1]
+        t2=ts[N2-1]
+        for N in range(N1, N2+1):
+            t=ts[N-1]
+            x=signal[N-1]
+            if vsh==1:
+                print("N="+str(N)+" t="+str(t)+" x="+str(x))
+            #
+            if N==N1 or (N>N1 and abs(x)>xmax):
+                xmax=x
+                Nmax=N
+                tmax=t
+                if vsh==1:
+                    print("max: N(xmax)="+str(Nmax)+" t(xmax)="+str(tmax)+" x="+str(xmax))
+                #
+            #
+        #
+        bounds.append(tmax)
+        N1=N2#+QPointsInSectHalf
+        if vsh==1:
+            print("Section - finally: t="+str(t1)+"..."+str(t2)+": "+" xmax="+str(xmax)+" t(xmax)="+str(tmax))
+        #
+    #
+    if vsh==1:
+        print("Answer: ",bounds)
+        print("FindImpactBounds finishes working")
+    #
+    return bounds
+#
+
+def compute_spectrum_1(
+    x,
+    fs,
+    window_type="hann",
+    remove_mean=True,
+    use_detrend=False,
+    zero_padding_factor=1,
+    fmin=None,
+    fmax=None
+):
+    """
+    Улучшенный расчёт спектра для модального анализа.
+    """
+
+    x = np.asarray(x, dtype=float)
+
+    # --- DC и тренд ---
+    if remove_mean:
+        x = x - np.mean(x)
+
+    if use_detrend:
+        x = detrend(x)
+
+    N_orig = len(x)
+
+    # --- Zero-padding ---
+    N = N_orig * zero_padding_factor
+    if zero_padding_factor > 1:
+        x = np.pad(x, (0, N - N_orig), mode='constant')
+
+    # --- Окно ---
+    if window_type is not None:
+        if window_type == "hann":
+            window = np.hanning(len(x))
+        elif window_type == "hamming":
+            window = np.hamming(len(x))
+        elif window_type == "blackman":
+            window = np.blackman(len(x))
+        else:
+            raise ValueError("Unknown window type")
+
+        # Нормировка окна
+        window /= np.mean(window)
+        x = x * window
+
+    # --- FFT ---
+    X = np.fft.rfft(x)
+    freqs = np.fft.rfftfreq(len(x), 1/fs)
+    amps = 2 * np.abs(X) / len(x)
+
+    # --- Ограничение диапазона ---
+    if fmin is not None or fmax is not None:
+        mask = np.ones_like(freqs, dtype=bool)
+        if fmin is not None:
+            mask &= freqs >= fmin
+        if fmax is not None:
+            mask &= freqs <= fmax
+
+        freqs = freqs[mask]
+        amps = amps[mask]
+
+    return freqs, amps
+#
+def compute_spectrum_2(
+    # abls exta window type et alfa et zgof ce all
+    x,
+    fs,
+    window_type=None,      # None, 'hann', 'decay'
+    alpha=None,            # только для decay
+    use_mean=False,
+    use_detrend=False,
+    zero_padding_factor=1
+):
+    """
+    Вычисление амплитудного спектра.
+    """
+
+    x_proc = np.array(x, dtype=float)
+
+    # --- подготовка сигнала ---
+    if use_mean:
+        x_proc -= np.mean(x_proc)
+
+    if use_detrend:
+        x_proc = detrend(x_proc)
+
+    N_orig = len(x_proc)
+
+    # --- zero padding ---
+    if zero_padding_factor > 1:
+        N = N_orig * zero_padding_factor
+        x_proc = np.pad(x_proc, (0, N - N_orig), 'constant')
+    else:
+        N = N_orig
+
+    # --- окна ---
+    if window_type == 'hann':
+        window = np.hanning(len(x_proc))
+        x_proc *= window
+
+    elif window_type == 'decay':
+        if alpha is None:
+            raise ValueError("Для decay окна необходимо задать alpha")
+        window = decay_window(len(x_proc), fs, alpha)
+        x_proc *= window
+
+    # --- FFT ---
+    X = np.fft.fft(x_proc)
+    amps = 2 * np.abs(X[:N // 2]) / N
+    freqs = np.fft.fftfreq(N, d=1/fs)[:N // 2]
+
+    return freqs, amps
+#
+def refine_peak_parabolic(freqs, amps, k):
+    """
+    Уточнение частоты пика параболической интерполяцией.
+    
+    freqs — массив частот
+    amps  — массив амплитуд
+    k     — индекс пика
+    """
+
+    if k <= 0 or k >= len(amps) - 1:
+        return freqs[k], amps[k]
+
+    y1 = amps[k - 1]
+    y2 = amps[k]
+    y3 = amps[k + 1]
+
+    denom = (y1 - 2*y2 + y3)
+    if denom == 0:
+        return freqs[k], amps[k]
+def bandpass_filter(
+    x,
+    fs,
+    f0,
+    bandwidth,
+    order=4
+):
+    """
+    Узкополосный фильтр вокруг моды f0.
+    bandwidth — полная ширина полосы (Гц)
+    """
+
+    f1 = max(f0 - bandwidth / 2, 0.1)
+    f2 = f0 + bandwidth / 2
+
+    nyq = fs / 2
+    b, a = butter(
+        order,
+        [f1 / nyq, f2 / nyq],
+        btype='band'
+    )
+
+    return filtfilt(b, a, x)
+#
+#Как выбрать bandwidth
+#Ситуация	bandwidth
+#чистая мода	2–5% от f₀
+#близкие пики	1–2%
+#сильный шум	5–10%
+#
+#Слишком широко → биения
+#Слишком узко → «размазанная» фаза
+#
+def envelope_hilbert(x):
+    """
+    Огибающая сигнала через аналитический сигнал.
+    """
+    analytic = hilbert(x)
+    env = np.abs(analytic)
+    return env
+#
+def estimate_decay(
+    t,
+    envelope,
+    t_start=None,
+    t_end=None
+):
+    """
+    Оценка коэффициента затухания по огибающей.
+    """
+
+    mask = np.ones_like(t, dtype=bool)
+
+    if t_start is not None:
+        mask &= t >= t_start
+    if t_end is not None:
+        mask &= t <= t_end
+
+    t_fit = t[mask]
+    env_fit = envelope[mask]
+
+    # защита от лог(0)
+    env_fit = np.maximum(env_fit, np.max(env_fit) * 1e-6)
+
+    ln_env = np.log(env_fit)
+
+    # линейная аппроксимация
+    coef = np.polyfit(t_fit, ln_env, 1)
+
+    decay_rate = -coef[0]  # 1/с
+    return decay_rate, coef
+#
+def extract_mode(
+    t,
+    x,
+    fs,
+    f0,
+    bandwidth,
+    filter_order=4,
+    decay_fit_window=None
+):
+    """
+    Полный цикл выделения моды.
+    """
+
+    # 1. Фильтр
+    x_mode = bandpass_filter(
+        x, fs, f0, bandwidth, filter_order
+    )
+
+    # 2. Огибающая
+    env = envelope_hilbert(x_mode)
+
+    # 3. Затухание
+    if decay_fit_window:
+        decay, coef = estimate_decay(
+            t,
+            env,
+            decay_fit_window[0],
+            decay_fit_window[1]
+        )
+    else:
+        decay, coef = estimate_decay(t, env)
+
+    return {
+        "frequency": f0,
+        "signal": x_mode,
+        "envelope": env,
+        "decay_rate": decay,
+        "fit_coef": coef
+    }
+#
+def extract_modes(
+    t,
+    x,
+    fs,
+    frequencies,
+    bandwidths,
+    decay_windows=None
+):
+    """
+    frequencies — список частот мод
+    bandwidths — список полос
+    decay_windows — [(t1, t2), ...] или None
+    """
+
+    modes = []
+
+    for i, f0 in enumerate(frequencies):
+        bw = bandwidths[i]
+
+        win = None
+        if decay_windows:
+            win = decay_windows[i]
+
+        mode = extract_mode(
+            t,
+            x,
+            fs,
+            f0,
+            bw,
+            decay_fit_window=win
+        )
+
+        modes.append(mode)
+
+    return modes
+#
         
-            
+# --------------------------------------------------------
+
+def Sort3ArraysByOne(Ns, Freqs, Amps, byNs1Freqs2Amps3=3):
+    Q=len(Ns)
+    for i in range(1, Q-1+1):
+        for j in range(i+1, Q+1):
+            N_i=Ns[i-1]
+            freq_i=Freqs[i-1]
+            Amp_i=Amps[i-1]
+            N_j=Ns[j-1]
+            freq_j=Freqs[j-1]
+            Amp_j=Amps[j-1]
+            if (byNs1Freqs2Amps3==1 and N_j>N_i)\
+                or \
+               (byNs1Freqs2Amps3==1 and freq_j>freq_i)\
+                or \
+               (byNs1Freqs2Amps3==1 and Amp_j>Amp_i):
+                Ns[i-1]=N_j
+                Amps[i-1]=Amp_j
+                Freqs[i-1]=freq_j
+                Ns[j-1]=N_i
+                Amps[j-1]=Amp_i
+                Freqs[j-1]=freq_i
+            #
+        #
+    #
+#
+def Sort3ArraysByOne_v1(arr1, arr2, arr3, by123=3, DescNotAsc=True):
+    Q=len(arr1)
+   
+    for i in range(1, Q-1+1):
+        for j in range(i+1, Q+1):
+            arr1_i=arr1[-1]
+            arr2_i=arr2[i-1]
+            arr3_i=arr3[i-1]
+            arr1_j=arr1[j-1]
+            arr2_j=arr2[j-1]
+            arr3_j=arr3[j-1]
+            #
+            if (
+                  DescNotAsc
+                  and
+                  (
+                   (by123==1 and arr1_j>arr1_i)
+                    or
+                   (by123==1 and arr2_j>arr2_i)
+                    or
+                    (by123==1 and arr3_j>arr3_i)
+                   )
+               ) \
+               or \
+               (
+                  DescNotAsc==False
+                  and
+                  (
+                   (by123==1 and arr1_j<arr1_i)
+                    or
+                   (by123==1 and arr2_j<arr2_i)
+                    or
+                    (by123==1 and arr3_j<arr3_i)
+                   )
+               ):
+                arr1[i-1]=arr1_j
+                arr2[i-1]=arr2_j
+                arr3[i-1]=arr3_j
+                arr1[j-1]=arr1_i
+                arr2[j-1]=arr2_i
+                arr3[j-1]=arr3_i
+            #
+        #
+    #
+#
+def Sort3ArraysByOne_v2(arr1, arr2, arr3, by123=3, DescNotAsc=True, vsh=0):
+    if vsh==1:
+        print("Sort3ArraysByOne_v2 starts working")
+        if DescNotAsc:
+            print("sort by arr"+str(by123)+" descending")
+        else:
+            print("sort by arr"+str(by123)+" ascending")
+        #
+    #
+    Q=len(arr1)
+    if vsh==1:
+        print("given:")
+        if Q%2==0:
+            print("Q ="+str(Q)+"- is even")
+            N=1
+            if isinstance(N, int):
+                print("N - int")
+            else:
+                print("N - ne int")
+            print("N="+str(N)+": x1["+str(N)+"]="+str(arr1[N-1])+" x2["+str(N)+"]="+str(arr2[N-1])+" x3["+str(N)+"]="+str(arr3[N-1]))
+            N=Q/2
+            print("N=Q/2="+str(N))
+            if isinstance(N, int):
+                print("N - int")
+            else:
+                print("N - ne int")
+            N=Q//2
+            print("N=Q//2="+str(N))
+            if isinstance(N, int):
+                print("N - int")
+            else:
+                print("N - ne int")
+            N=(Q+2.2+2.4-1.3-3.1)//2
+            print("N=(Q+2.2+2.4-1.3-3.1)//2="+str(N))
+            print("N="+str(N))
+            if isinstance(Q, int):
+                print("Q - int")
+            else:
+                print("Q - ne int")
+            if isinstance(N, int):
+                print("N - int")
+            else:
+                print("N - ne int")
+            N=Q//2
+            print("N="+str(N)+": x1["+str(N)+"]="+str(arr1[N-1])+" x2["+str(N)+"]="+str(arr2[N-1])+" x3["+str(N)+"]="+str(arr3[N-1]))
+            N=Q
+            print("N="+str(N)+": x1["+str(N)+"]="+str(arr1[N-1])+" x2["+str(N)+"]="+str(arr2[N-1])+" x3["+str(N)+"]="+str(arr3[N-1]))
+        else:
+            print("Q ="+str(Q)+" - is odd")
+            N=1
+            print("N="+str(N)+": x1["+str(N)+"]="+str(arr1[N-1])+" x2["+str(N)+"]="+str(arr2[N-1])+" x3["+str(N)+"]="+str(arr3[N-1]))
+            N=(Q-1)/2+1
+            N=(Q-1)//2+1
+            print("N="+str(N)+": x1["+str(N)+"]="+str(arr1[N-1])+" x2["+str(N)+"]="+str(arr2[N-1])+" x3["+str(N)+"]="+str(arr3[N-1]))
+            N=Q
+            print("N="+str(N)+": x1["+str(N)+"]="+str(arr1[N-1])+" x2["+str(N)+"]="+str(arr2[N-1])+" x3["+str(N)+"]="+str(arr3[N-1]))
+        #
+    #
+    for i in range(1, Q-1+1):
+        for j in range(i+1, Q+1):
+            arr1_i=arr1[i-1]
+            arr2_i=arr2[i-1]
+            arr3_i=arr3[i-1]
+            arr1_j=arr1[j-1]
+            arr2_j=arr2[j-1]
+            arr3_j=arr3[j-1]
+            if vsh==1:
+                print("i="+str(i)+" j="+str(j)) 
+                print("i: x1["+str(i)+"]="+str(arr1_i)+" x2["+str(i)+"]="+str(arr2_i)+" x3["+str(i)+"]="+str(arr3_i))
+                print("j: x1["+str(j)+"]="+str(arr1_j)+" x2["+str(j)+"]="+str(arr2_j)+" x3["+str(j)+"]="+str(arr3_j))
+            #
+            if DescNotAsc:
+                if \
+                   (by123==1 and arr1_j>arr1_i) \
+                    or \
+                   (by123==2 and arr2_j>arr2_i) \
+                    or \
+                   (by123==3 and arr3_j>arr3_i):
+                    arr1[i-1]=arr1_j
+                    arr2[i-1]=arr2_j
+                    arr3[i-1]=arr3_j
+                    arr1[j-1]=arr1_i
+                    arr2[j-1]=arr2_i
+                    arr3[j-1]=arr3_i
+                    if vsh==1:
+                        print("exchange")
+                    #
+                else:
+                    if vsh==1:
+                        print("stay")
+                    #
+                #
+            else:
+                if \
+                   (by123==1 and arr1_j<arr1_i) \
+                    or \
+                   (by123==2 and arr2_j<arr2_i) \
+                    or \
+                   (by123==3 and arr3_j<arr3_i):
+                    arr1[i-1]=arr1_j
+                    arr2[i-1]=arr2_j
+                    arr3[i-1]=arr3_j
+                    arr1[j-1]=arr1_i
+                    arr2[j-1]=arr2_i
+                    arr3[j-1]=arr3_i
+                    if vsh==1:
+                        print("exchange")
+                    #
+                else:
+                    if vsh==1:
+                        print("stay")
+                    #
+                #
+            #
+        #
+    #
+    if vsh==1:
+        print("answer:")
+        for N in range(Q):
+            print("N="+str(N+1)+": x1["+str(N+1)+"]="+str(arr1[N])+" x2["+str(N+1)+"]="+str(arr2[N])+" x3["+str(N+1)+"]="+str(arr3[N]))
+        #
+        print("Sort3ArraysByOne_v2 finishes working")    
+    #
+#
+def Sort3ArraysByOne_v3(arr1, arr2, arr3, by123=3, AscNotDesc=False, vsh=0):
+    if vsh==1:
+        print("Sort3ArraysByOne_v3 starts working")
+        if AscNotDesc:
+            print("sort by arr"+str(by123)+" ascending")
+        else:
+            print("sort by arr"+str(by123)+" descending")
+        #
+    #
+    Q=len(arr1)
+    if vsh==1:
+        print("given:")
+        if Q%2==0:
+            print("Q ="+str(Q)+" - is even")
+            N=1
+            print("N="+str(N)+": x1["+str(N-1)+"]="+str(arr1[N-1])+" x2["+str(N)+"]="+str(arr2[N-1])+" x3["+str(N)+"]="+str(arr3[N-1]))
+            N=Q/2
+            N=Q//2
+            print("N="+str(N)+": x1["+str(N-1)+"]="+str(arr1[N-1])+" x2["+str(N)+"]="+str(arr2[N-1])+" x3["+str(N)+"]="+str(arr3[N-1]))
+            N=Q
+            print("N="+str(N)+": x1["+str(N-1)+"]="+str(arr1[N-1])+" x2["+str(N)+"]="+str(arr2[N-1])+" x3["+str(N)+"]="+str(arr3[N-1]))
+        else:
+            print("Q ="+str(Q)+" - is odd")
+            N=1
+            print("N="+str(N)+": x1["+str(N-1)+"]="+str(arr1[N-1])+" x2["+str(N)+"]="+str(arr2[N-1])+" x3["+str(N)+"]="+str(arr3[N-1]))
+            N=(Q-1)/2+1
+            N=(Q-1)//2+1
+            print("N="+str(N)+": x1["+str(N-1)+"]="+str(arr1[N-1])+" x2["+str(N)+"]="+str(arr2[N-1])+" x3["+str(N)+"]="+str(arr3[N-1]))
+            N=Q
+            print("N="+str(N)+": x1["+str(N-1)+"]="+str(arr1[N-1])+" x2["+str(N)+"]="+str(arr2[N-1])+" x3["+str(N)+"]="+str(arr3[N-1]))
+        #
+    #
+    for i in range(1, Q-1+1):
+        for j in range(i+1, Q+1):
+            arr1_i=arr1[i-1]
+            arr2_i=arr2[i-1]
+            arr3_i=arr3[i-1]
+            arr1_j=arr1[j-1]
+            arr2_j=arr2[j-1]
+            arr3_j=arr3[j-1]
+            if vsh==1:
+                print("i="+str(i)+" j="+str(j)) 
+                print("i: x1["+str(i)+"]="+str(arr1_i)+" x2["+str(i)+"]="+str(arr2_i)+" x3["+str(i)+"]="+str(arr3_i))
+                print("j: x1["+str(j)+"]="+str(arr1_j)+" x2["+str(j)+"]="+str(arr2_j)+" x3["+str(j)+"]="+str(arr3_j))
+            #
+            if AscNotDesc:
+                if \
+                   (by123==1 and arr1_j<arr1_i) \
+                    or \
+                   (by123==2 and arr2_j<arr2_i) \
+                    or \
+                   (by123==3 and arr3_j<arr3_i):
+                    arr1[i-1]=arr1_j
+                    arr2[i-1]=arr2_j
+                    arr3[i-1]=arr3_j
+                    arr1[j-1]=arr1_i
+                    arr2[j-1]=arr2_i
+                    arr3[j-1]=arr3_i
+                    if vsh==1:
+                        print("exchange")
+                    #
+                else:
+                    if vsh==1:
+                        print("stay")
+                    #
+                #
+            else:
+                if \
+                   (by123==1 and arr1_j>arr1_i) \
+                    or \
+                   (by123==2 and arr2_j>arr2_i) \
+                    or \
+                   (by123==3 and arr3_j>arr3_i):
+                    arr1[i-1]=arr1_j
+                    arr2[i-1]=arr2_j
+                    arr3[i-1]=arr3_j
+                    arr1[j-1]=arr1_i
+                    arr2[j-1]=arr2_i
+                    arr3[j-1]=arr3_i
+                    if vsh==1:
+                        print("exchange")
+                    #
+                else:
+                    if vsh==1:
+                        print("stay")
+                    # 
+                #
+            #
+        #
+    #
+    if vsh==1:
+        print("answer:")
+        for N in range(Q):
+            print("N="+str(N+1)+": x1["+str(N+1)+"]="+str(arr1[N])+" x2["+str(N+1)+"]="+str(arr2[N])+" x3["+str(N+1)+"]="+str(arr3[N]))
+        #
+        print("Sort3ArraysByOne_v3 finishes working")    
+    #
+    return arr1, arr2, arr3
+#
+
+def ChooseFreqsBySetMemberN(Ns, Freqs, amps, FreqsSample, N, dFPercent=20, dAPercent=80):
+    print("\nChooseFreqsBySetMemberN starts working")
+    print("Frequencies standard, nearest to which real frequencies are being chosen:")
+    print(FreqsSample)
+    rslt=[]
+    freqSmp=FreqsSample[N-1]
+    print("Choosing frequency, nearest to value N "+str(N)+" : "+str(freqSmp))
+    dFPerCentLim=50
+    Q=len(Ns)
+    QS=len(FreqsSample)
+    dFrs=[]
+    freqs_chsn=[]
+    amps_chsn=[]
+    Ns_chsn=[]
+    if N==1:
+        minFr=0
+        maxFr=freqSmp+(FreqsSample[N+1-1]-FreqsSample[N-1])/100*dFPercent
+    elif N==QS:
+        minFr=freqSmp-(FreqsSample[N-1]-FreqsSample[N-1-1])/100*dFPercent
+        maxFr=freqSmp+(FreqsSample[N-1]-FreqsSample[N-1-1])/100*dFPercent
+    else:
+        minFr=freqSmp-(FreqsSample[N-1]-FreqsSample[N-1-1])/100*dFPercent
+        maxFr=freqSmp+(FreqsSample[N+1-1]-FreqsSample[N-1])/100*dFPercent
+    #
+    print("Chosen range: "+str(dFPercent)+"%: "+str(minFr)+"..."+str(maxFr))
+    #
+    for i in range (Q):
+        amp_cur=amps[i]
+        if i==0 or (i>0 and amp_cur>amp_max):
+            amp_max=amp_cur
+        #
+    #
+    for i in range (Q):
+        freq_cur=Freqs[i]
+        if freq_cur>=minFr and freq_cur<=maxFr:
+            freqs_chsn.append(freq_cur)
+            Ns_chsn.append(i+1)
+            amps_chsn.append(amps[i])
+            dFrs.append(abs(freq_cur-freqSmp))
+        #
+    #
+    Q_chsn=len(freqs_chsn)
+    if(Q_chsn==0):
+        
+        if N==1:
+            minFr=0
+            maxFr=freqSmp+(FreqsSample[N+1-1]-FreqsSample[N-1])/100*dFPerCentLim
+        elif N==QS:
+            minFr=freqSmp-(FreqsSample[N-1]-FreqsSample[N-1-1])/100*dFPerCentLim
+            maxFr=freqSmp+(FreqsSample[N-1]-FreqsSample[N-1-1])/100*dFPerCentLim
+        else:
+            minFr=freqSmp-(FreqsSample[N-1]-FreqsSample[N-1-1])/100*dFPerCentLim
+            maxFr=freqSmp+(FreqsSample[N+1-1]-FreqsSample[N-1])/100*dFPerCentLim
+        #
+        print("no frequencies in this range found, making range wider, now it is: "+str(minFr)+"..."+str(maxFr))
+        #
+        for i in range (Q):
+            freq_cur=Freqs[i]
+            if freq_cur>=minFr and freq_cur<=maxFr:
+                freqs_chsn.append(freq_cur)
+                Ns_chsn.append(i+1)
+                amps_chsn.append(amps[i])
+                dFrs.append(abs(freq_cur-freqSmp))
+            #
+        #
+    #
+    Q_chsn=len(freqs_chsn)
+    if Q_chsn>0:
+        print("Top NEAREST ("+str(Q_chsn)+") frequencies:")
+        for i in range (1, Q_chsn-1+1):
+            for j in range(i+1, Q_chsn+1):
+                freq_i=freqs_chsn[i-1]
+                amp_i=amps_chsn[i-1]
+                Ns_i=Ns_chsn[i-1]
+                dFr_i=dFrs[i-1]
+                freq_j=freqs_chsn[j-1]
+                amp_j=amps_chsn[j-1]
+                Ns_j=Ns_chsn[j-1]
+                dFr_j=dFrs[j-1]
+                if(dFr_j<dFr_i):
+                    freqs_chsn[i-1]=freq_j
+                    amps_chsn[i-1]=amp_j
+                    Ns_chsn[i-1]=Ns_j
+                    dFrs[i-1]=dFr_j
+                    freqs_chsn[j-1]=freq_i
+                    amps_chsn[j-1]=amp_i
+                    Ns_chsn[j-1]=Ns_i
+                    dFrs[j-1]=dFr_i
+                #
+            #
+        #   
+        print("returning order by frequencies accending")
+        for i in range (1, Q_chsn-1+1):
+            for j in range(i+1, Q_chsn+1):
+            	freq_i=freqs_chsn[i-1]
+            	amp_i=amps_chsn[i-1]
+            	Ns_i=Ns_chsn[i-1]
+            	dFr_i=dFrs[i-1]
+            	freq_j=freqs_chsn[j-1]
+            	amp_j=amps_chsn[j-1]
+            	Ns_j=Ns_chsn[j-1]
+            	dFr_j=dFrs[j-1]
+            	if(freq_j<freq_i):
+                    freqs_chsn[i-1]=freq_j#
+                    amps_chsn[i-1]=amp_j
+                    Ns_chsn[i-1]=Ns_j
+                    dFrs[i-1]=dFr_j
+                    freqs_chsn[j-1]=freq_i
+                    amps_chsn[j-1]=amp_i
+                    Ns_chsn[j-1]=Ns_i
+                    dFrs[j-1]=dFr_i
+                #
+            #
+        #   
+        for i in range(1, Q_chsn+1):
+            print("N="+str(Ns_chsn[i-1])+" freq="+str(freqs_chsn[i-1])+" amp="+str(amps_chsn[i-1])+" dFr="+str(dFrs[i-1]))
+        #
+        print("Top MAX amplitude frequencies:")
+        for i in range (1, Q_chsn-1+1):
+            for j in range(i+1, Q_chsn+1):
+                freq_i=freqs_chsn[i-1]
+                amp_i=amps_chsn[i-1]
+                Ns_i=Ns_chsn[i-1]
+                dFr_i=dFrs[i-1]
+                freq_j=freqs_chsn[j-1]
+                amp_j=amps_chsn[j-1]
+                Ns_j=Ns_chsn[j-1]
+                dFr_j=dFrs[j-1]
+                if(freq_j<freq_i):
+                    freqs_chsn[i-1]=freq_j
+                    amps_chsn[i-1]=amp_j
+                    Ns_chsn[i-1]=Ns_j
+                    dFrs[i-1]=dFr_j
+                    freqs_chsn[j-1]=freq_i
+                    amps_chsn[j-1]=amp_i
+                    Ns_chsn[j-1]=Ns_i
+                    dFrs[j-1]=dFr_i
+                #
+            #
+        #   
+        for i in range(1, Q_chsn+1):
+            print("N="+str(Ns_chsn[i-1])+" freq="+str(freqs_chsn[i-1])+" amp="+str(amps_chsn[i-1])+" dFr="+str(dFrs[i-1]))
+        #
+        if amps_chsn[0]>=amp_max/100*dAPercent:
+            rslt=[Ns_chsn[0], freqs_chsn[0], amps_chsn[0]]
+            print("Finally chosen:")
+            print("N="+str(Ns_chsn[1-1])+" freq="+str(freqs_chsn[1-1])+" amp="+str(amps_chsn[1-1])+" dFr="+str(dFrs[1-1]))
+        else:
+            print("Chosen :nothing, no approximate frequences with big enough value of amplitude")
+        #
+    else:
+        print("Chosen :nothing, no approximate frequences")
+    #
+    print("ChooseFreqsBySetMemberN finishes working\n")
+    return rslt
+#
