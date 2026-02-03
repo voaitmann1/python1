@@ -661,4 +661,4 @@ if do_ElaborateFreqs:
     for i in range(1, QFreqPeaksS):
         print("peakN "+str(i)+" freq = "+str(peakFreqsS[i-1])+" freqN= "+str(peaksNsS[i-1])+" ampl= "+str(peaksS[i-1]))
 
-    print("Step3 finishes working")
+print("Step3 finishes working")

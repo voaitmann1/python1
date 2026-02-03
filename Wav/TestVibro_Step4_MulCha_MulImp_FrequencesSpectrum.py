@@ -94,6 +94,22 @@ with open(filePathIniData+"\\"+ImpactBoundsFileOwnName, mode='r', newline='') as
         print("Impact N "+str(impactN)+": "+str(imp_rng)+" ImpLB="+str(ImpLB)+" - ImpHB="+str(ImpHB))
     #
 #
+for fileOwnName in fileOwnNames:
+    fileFullName = filePathIniData +"\\"+ fileOwnName+fileEnding
+    filenames.append(fileFullName)
+    print("reading "+fileFullName)
+#
+print("trying to read "+filenames[1-1])
+#s, si1, en1 = read_SignalAndEnergy_csv(filenames[1-1])
+#print(filenames[1-1]+" done, "+str(len(si1))+" vals read")
+tss, sis1, ens1 = read_SignalAndEnergy_csv(filenames[1-1])
+print(filenames[1-1]+" done, "+str(len(sis1))+" vals read")
+print("trying to read "+filenames[2-1])
+#ts, si2, en2 = read_SignalAndEnergy_csv(filenames[2-1])
+#print(filenames[2-1]+" done, "+str(len(si2))+" vals read")
+tss, sis2, ens2 = read_SignalAndEnergy_csv(filenames[2-1])
+print(filenames[2-1]+" done, "+str(len(sis2))+" vals read")
+#
 impactsCount=len(imp_rngs)
 print("In all "+str(impactsCount)+" impacts")
 
@@ -103,9 +119,12 @@ print(filenames[1-1]+" done, "+str(len(sis1))+" vals read")
 print("trying to read "+filenames[2-1])
 tss, sis2, ens2 = read_SignalAndEnergy_csv(filenames[2-1])
 print(filenames[2-1]+" done, "+str(len(sis2))+" vals read")
+#ob tss s'idy in tbi files
 
-
-
+with open(PathToNamesFiles+"\\"+"Frequences.csv", mode='w', newline='') as ff:
+    writer_ff=csv.writer(ff)
+    #writer_ff.writerow(["tStart", "tFin", "Freq", "Amp", "ImpactN", "SensorN"])
+    writer_ff.writerow(['N', 'Freq', "ampl", "sensorN", "impactN"])
 
 for impactN in range(impactsCount):
     countImpactsElaborated=impactN+1
@@ -115,15 +134,66 @@ for impactN in range(impactsCount):
     tFin1=imp_rng[2-1][1-1]
     tFin2=imp_rng[2-1][1-2]
     #
+    ImpLB=tStart
+    if tFin1 <= tFin2:
+        ImpHB=tFin1
+    else:
+        ImpHB=tFin2
+    #
+    print("tmin="+str(tss[0])+" tmax="+str(tss[-1])+" ImpLB="+str(ImpLB)+" ImpHB="+str(ImpHB))
+    #
+    ts=[]
+    si1=[]
+    si2=[]
+    #
+    en1=[]
+    en2=[]
+    ensum=[]
+    #
     for i in range(1, len(tss)+1):#taks in python
         if tss[i-1]>=ImpLB and tss[i-1]<=ImpHB:
             ts.append(tss[i-1])
             si1.append(sis1[i-1])
-            #en1.append(ens1[i-1])
             si2.append(sis2[i-1])
-            #en2.append(ens2[i-1])
-            #ensum.append(ens1[i-1]+ens2[i-1])
+            #
+            en1.append(ens1[i-1])
+            en2.append(ens2[i-1])
+            ensum.append(ens1[i-1]+ens2[i-1])
             #siS.append(sis1[i-1]+sis2[i-1])
+            #
+            #print(str(i)+") t="+str(tss[i-1])+" IS in ["+str(ImpLB)+"..."+str(ImpHB)+"]")
+        else:
+            #print(str(i)+") t="+str(tss[i-1])+" NOT in ["+str(ImpLB)+"..."+str(ImpHB)+"]")
+            pass#ob to else wa ut'print
+        #
+    #
+    print("read vals: ts:" +str(len(ts))+" vals, +si1: "+str(len(si1))+" vals, +en1: "+str(len(en1))+" +si2: "+str(len(si2))+" vals, +en2: "+str(len(en2))+" ") 
+    #
+    print("read vals: ts:" +str(len(ts))+" vals, +si1: "+str(len(si1))+" vals, +en1: "+str(len(en1))+" +si2: "+str(len(si2))+" vals, +en2: "+str(len(en2))+" ") 
+    GraphName="Сигналы и их энергия обоих датчиков - файлы "+fileOwnNames[1-1]+" и "+fileOwnNames[2-1]
+    plot_several1([
+                [
+                   [(ts, si1), (ts, en1)], 2
+                ],
+                [
+                   [(ts, si2), (ts, en2)], 2#[(ts, si1), (ts, en1)], 2
+                ],
+                [
+                   #[(ts, en1+en2)], 1
+                   [(ts, ensum)], 1
+                ]
+              ],
+              [
+                ["t, с", "Сигнал", "Энергия сигнала"],                  
+                ["t, с", "Сигнал", "Энергия сигнала"],
+                ["t, с", "Энергия"]
+              ],
+              [
+                [ {"color":"blue"}, {"color":"green"}],
+                [ {"color":"blue"}, {"color":"green"}],
+                [ {"color":"green"}]
+              ],
+              GraphName)
         #
     #
     do_ElaborateFreqs=True
@@ -492,6 +562,7 @@ for impactN in range(impactsCount):
                 print("Ns:" ,peaksNs2_chosen)
                 print("amps:" ,peaksNs2_chosen)
             #
+            #
             print("\nFinaly - chosen frequences:")
             Q1_chosen=len(peakFreqs1_chosen)
             print("For 1st sensor: "+str(Q1_chosen))
@@ -522,20 +593,24 @@ for impactN in range(impactsCount):
             for i in range(Q2_chosen):
                 print(str(i+1)+") "+" N: "+str(peaksNs2_chosen[i])+" freq="+str(peakFreqs2_chosen[i])+" ampl="+str(peaks2_chosen[i]))
             #
-            with open(PathToNamesFiles+"\\"+"Frequences.csv", mode='w', newline='') as ff:
+            #def refine_peak_parabolic(freqs, amps, k): # return freqs[k], amps[k] # ab MyPyVibroLib
+            for k in range (Q1_chosen):
+                freq1_refined, amp1_refined = refine_peak_parabolic(peakFreqs1_chosen, peaks1_chosen, k)
+            with open(PathToNamesFiles+"\\"+"Frequences.csv", mode='a', newline='') as ff:
                 writer_ff = csv.writer(ff)
-                writer.writerow(['N', 'Freq', "ampl", "sensorN", "impactN"])
+                #writer.writerow(['N', 'Freq', "ampl", "sensorN", "impactN"])
                 for i in range(Q1_chosen):
-                    print([str(i+1), str(peakFreqs1_chosen[i]), +str(peaks1_chosen[i]), "1", ])
+                    writer_ff.writerow([str(i+1), str(peakFreqs1_chosen[i]), str(peaks1_chosen[i]), "1", str(impactN)])
                 #
                 for i in range(Q2_chosen):
-                    print([str(i+Q1_chosen), str(peakFreqs2_chosen[i]), +str(peaks2_chosen[i]), "2", ])
+                    writer_ff.writerow([str(i+1+Q1_chosen), str(peakFreqs2_chosen[i]), str(peaks2_chosen[i]), "2", str(impactN)])
                 #
             #
             print("Frequences.csv written successfully")
-            print("Reading Frequences.csv")
-            with open(PathToNamesFiles+"\\"+"Frequences.csv", mode='r', newline='') as ff:
-                pass
+            #$print("Reading Frequences.csv")
+            #with open(PathToNamesFiles+"\\"+"Frequences.csv", mode='a', newline='') as ff:
+            #    writer_ff=csv.writer(ff)
+            #    writer_ff.writerow(s
             print("\nUnited freqs list (For both sensors. Sorted by Freqs accendance):\n")
             #
             peaksNs_united_chosen=copy.deepcopy(peaksNs2_chosen)
@@ -584,5 +659,6 @@ for impactN in range(impactsCount):
             #
         #
     #for each impact#-
+    
 
 print("Step4 finishes working")
