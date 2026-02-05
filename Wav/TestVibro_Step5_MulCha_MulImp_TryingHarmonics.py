@@ -115,19 +115,90 @@ with open(PathToNamesFiles+"\\"+"Frequences.csv", mode='r', newline='') as ff:
                 freqs1.append(freq)
                 amps1.append(ampl)
                 #
-                print(str(recN)+" freq="+str(freq)+" ampl="+str(ampl)+" sensorN="+str(sensorN)+" impactN="+str(impactN))
+                #print(str(recN)+" freq="+str(freq)+" ampl="+str(ampl)+" sensorN="+str(sensorN)+" impactN="+str(impactN))
             elif sensorN==2:
                 freqs2.append(freq)
                 amps2.append(ampl)
                 #
-                print(str(recN)+" freq="+str(freq)+" ampl="+str(ampl)+" sensorN="+str(sensorN)+" impactN="+str(impactN))
+                #print(str(recN)+" freq="+str(freq)+" ampl="+str(ampl)+" sensorN="+str(sensorN)+" impactN="+str(impactN))
             else:
-                print(str(recN)+" impactN="+str(impactN)+" sensorN="+str(sensorN)+" - incorrect SensorN")
+                pass
+                #print(str(recN)+" impactN="+str(impactN)+" sensorN="+str(sensorN)+" - incorrect SensorN")
             #
         #
     #
 #
-QFreqs1=len(freqs1)
+QFreqs1=len(freqs1)#vikt: hin wa err: irr indent - ma indent wa ver, et err wa ob af else ov nah print wa comment'd ma ns'da pass 
+print("Frequences ("+str(QFreqs1)+") of 1st sensor:")
+for i in range(QFreqs1):
+    print(str(i+1)+") freq="+str(freqs1[i])+" ampl="+str(amps1[i]))
+#
 QFreqs2=len(freqs2)
+print("Frequences ("+str(QFreqs2)+") of 2nd sensor:")
+for i in range(QFreqs2):
+    print(str(i+1)+") freq="+str(freqs2[i])+" ampl="+str(amps2[i]))
+#
+print("Working with spectrum")
+GraphName="Спектр  сигнала (Избранные значения)- удар № "+str(impactN)+" - файлы "+fileOwnNames[1-1]+" и "+fileOwnNames[2-1]
+            
+plot_several1(
+    [
+        [   
+            [(freqs1, amps1)], 1
+        ],
+        [
+            [(freqs2, amps2)], 1
+        ]
+        #,
+        #[
+        #    [(freqsS, ampsS)], 1
+        #]
+    ],
+    [
+        ["Частота, Гц", "Амплитуда энергии сигнала"],                  
+        ["Частота, Гц", "Амплитуда энергии сигнала"],
+        #["Частота, Гц", "Амплитуда энергии сигнала"]
+    ],
+    None,
+    GraphName
+)
+#
+print("starting harmomic analysis....")
+#
+for i in range(QFreqs1):
+    freq=freqs1[i]
+    print(str(i+1)+") freq="+str(freq))
+    params=make_params(freq, fs)#fs s'lir'd ov
+    print("params of finding harmonics:")
+    print(params)
+    x_filt_harm, t = process_mode(sis1, tss, fs, params)
+    #
+    plot_several1(
+        [
+            [
+                [(t, si1)], 1
+            ]
+            ,
+            [
+                [(t, x_filt_harm)], 1
+            ]
+            #,
+            #[
+            #   #[(ts, en1+en2)], 1
+            #   [(ts, ensum)], 1
+            #]
+        ],
+        [
+            ["t, с", "Сигнал (весь)"],                  
+            ["t, с", "Сигнал (гармоника частотой "+str(freq)+")"]
+            
+        ],
+        [
+            [ {"color":"green"}],
+            [ {"color":"blue"}]
+        ],
+        GraphName
+    )
+    #
 #
 print("Step5 finishes working")

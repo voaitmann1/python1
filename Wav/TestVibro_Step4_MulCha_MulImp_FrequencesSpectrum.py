@@ -525,7 +525,7 @@ for impactN in range(impactsCount):
                         peaks1_chosen.append(amp1)
                         print("adding val")
                     else:
-                        print("val "+str(freq1)+" is suitable, but is already present in arr at ",isInArrayAtPosN(peaksNs1_chosen, peaksNs1[N1-1]))
+                        print("val "+str(freq1)+" is suitable, but is already present in arr at ", isInArrayAtPosN(peaksNs1_chosen, peaksNs1[N1-1]))
                     #
                 else:
                     print("no freqs of sensor 1 fit this value")
