@@ -49,7 +49,7 @@ ImpactLBs=[]
 ImpactHBs=[]
 #
 ImpactBoundsFileOwnName=""
-
+#
 fN=0#
 for fNm in fileOwnNames:#
     fN+=1#
@@ -276,7 +276,8 @@ for impactN in range(impactsCount):
         freq_lim=66#66 - if less than 66, so by QForPeak==5 ne find f=62
         
         if freq_lim==0:
-            pass
+            #pass
+            print("freq_lim==0")
         else:
             QFreqs=len(freqs1)
             for i in range(1, QFreqs-1+1):
@@ -345,26 +346,38 @@ for impactN in range(impactsCount):
     ampsStacksFin1=[]
     ampsStacksFin2=[]
     for freqN in range(QFreqs1cut): #I men QFreqs1cut=QFreqs2cut
-        #freqsAmpsStack1=[]
-        #freqsAmpsStack2=[]
+        freqsAmpsStack1=[]
+        freqsAmpsStack2=[]
+        #
         SAAmp1=0
         SAAmp2=0
         for impactN in range(impactsCount):
             amp1=ampsStacksIni1[freqN][impactN]
             amp1q=amp1*amp1
             SAAmp1+=amp1q
-            # freqsAmpsStack1.append(amp1)
+            #
+            freqsAmpsStack1.append(amp1)
+            #
+            print(" freqN="+str(freqN)+" impactN="+str(impactN)+": amp="+str(amp1)+" amp^2="+str(amp1q)+" (sensor1)")
+            #
             amp2=ampsStacksIni2[freqN][impactN]
             amp2q=amp2*amp2
             SAAmp2=amp2q
-            # freqsAmpsStack2.append(amp2)
+            #
+            freqsAmpsStack2.append(amp2)
+            #
+            print(" freqN="+str(freqN)+" impactN="+str(impactN)+": amp="+str(amp2)+" amp^2="+str(amp2q)+" (sensor2)")
         #
         SAAmp1=np.sqrt(SAAmp1)
         SAAmp1/=impactsCount
+        #SAAmp1=np.sqrt(np.mean(freqsAmpsStack1**2, axis=0))#N'inty,qly realf: mean_spec = np.sqrt(np.mean(all_spectra**2, axis=0)) 
         ampsStacksFin1.append(SAAmp1)
         SAAmp2=np.sqrt(SAAmp2)
         SAAmp2/=impactsCount
+        #SAAmp2=np.sqrt(np.mean(freqsAmpsStack2**2, axis=0))
         ampsStacksFin2.append(SAAmp2)
+        #
+        print("freqN="+str(freqN)+" amp med for sensor1="+str(SAAmp1)+" amp med for sensor2="+str(SAAmp2))
     #
     # Nu sha lists of all freqs et ir mid'd vals o'apmls.
     # Nu exta nur freqs co big amps
