@@ -445,5 +445,4 @@ for freqN in range(QFreqs1cut): #I men QFreqs1cut=QFreqs2cut
     # erst exta peak vals
     #
     
-
 print("Step4 finishes working")
