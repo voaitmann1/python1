@@ -603,4 +603,4 @@ for impactN in range(1, impactsCount):
 # et idy ut'senz N 2!
 # et calc ave vals o'freqs et amps
 #
-print("Step4 finishes working")
+print("Step4 finishes working") #qwerty
