@@ -1,4 +1,4 @@
-from MyPyVibroLib import *
+from MyPyVibroLib import *# 1 is for scipy version more fresh than 1.7.3 which is for py 3.8 
 from MyLib1 import *
 #
 #freq_st=[3.5,  9.5,  11.5,      20,     30,   32,    43,    50,    60] # pg7
@@ -126,8 +126,8 @@ with open(PathToNamesFiles+"\\"+"Frequences.csv", mode='w', newline='') as ff:
     #writer_ff.writerow(["tStart", "tFin", "Freq", "Amp", "ImpactN", "SensorN"])
     writer_ff.writerow(['N', 'Freq', "ampl", "sensorN", "impactN"])
 
-fresqStackIni1=[]
-fresqStackIni2=[]
+freqsStackIni1=[]
+freqsStackIni2=[]
 ampsStacksIni1=[]
 ampsStacksIni2=[]
 
@@ -371,11 +371,12 @@ for impactN in range(impactsCount):
     # af impact cycle hado sort D.
 #for je impact
 fTol=0.3*dfmin#ut'cluster'g l'freqs
+print("fTol="+str(fTol))
 #
 # Формируем (на 1-м ударе) и уточняем (на последующих) список номеров пиков.
 # Если в некотором ударе есть пики, каких не было в списке - вставляем - и сразу в нужную позицию
 #
-QFreqs=len(freqsStackIni)
+#QFreqs=len(freqsStackIni)
 peak_Ns1=[]
 peak_Ns2=[]
 freq_peaks1=[]
@@ -383,10 +384,12 @@ freq_peaks2=[]
 peak_amps1=[]
 peak_amps2=[]
 QForPeak=5
-count_added=0
+count_added1=0
+#count_added2=0
+print("Freqs (sensor 1) Ns:")
 for impactN in range(impactsCount):
     print("impactN="+str(impactN))
-    print("Freqs (sensor 1) Ns:")
+    #print("Freqs (sensor 1) Ns:")
     freqs1_cut=freqsStackIni1[impactN]
     amps1_cut=ampsStacksIni1[impactN]
     peak_Ns1_cur = MyFindFreqsPeaks_onlyNs(np.array(freqs1_cut), np.array(amps1_cut), QForPeak=QForPeak, vsh=0)
@@ -399,6 +402,8 @@ for impactN in range(impactsCount):
         countPeaks_cur=len(peak_Ns1_cur)
         countPeaks_1=len(peak_Ns1)
         print(peak_Ns1_cur)
+        print("was before:")
+        print(peak_Ns1)
         for i in range(countPeaks_cur):
             count_found1=0
             for j in range(countPeaks_1):
@@ -410,13 +415,18 @@ for impactN in range(impactsCount):
                 print("New peak N found: "+str(peak_Ns1_cur[i]))
                 arr1DComparableInsByOrder(peak_Ns1, peak_Ns1_cur[i])
                 #
-                print("Now:")
+                print("Now - united:")
                 print(peak_Ns1)
-                count_added+=1
+                count_added1+=1
             #
         #
     #
-    print("Freqs (sensor 2) Ns:")
+#
+count_added2=0#
+print("Freqs (sensor 2) Ns:")
+for impactN in range(impactsCount):
+    print("impactN="+str(impactN))
+    #print("Freqs (sensor 2) Ns:")
     freqs2_cut=freqsStackIni2[impactN]
     amps2_cut=ampsStacksIni2[impactN]
     peak_Ns2_cur = MyFindFreqsPeaks_onlyNs(np.array(freqs2_cut), np.array(amps2_cut), QForPeak=QForPeak, vsh=0)
@@ -429,6 +439,8 @@ for impactN in range(impactsCount):
         countPeaks_cur=len(peak_Ns2_cur)
         countPeaks_2=len(peak_Ns2)
         print(peak_Ns2_cur)
+        print("was before:")
+        print(peak_Ns2)
         for i in range(countPeaks_cur):
             count_found2=0
             for j in range(countPeaks_2):
@@ -440,14 +452,15 @@ for impactN in range(impactsCount):
                 print("New peak N found: "+str(peak_Ns2_cur[i]))
                 arr1DComparableInsByOrder(peak_Ns2, peak_Ns2_cur[i])
                 #
-                print("Now:")
+                print("Now - united::")
                 print(peak_Ns2)
-                count_added+=1
+                count_added2+=1
             #
         #
     #
 #
-print("Ns added: "+str(count_added))
+count_added=count_added1+count_added2
+print("Ns added (for both): "+str(count_added))
 #
 # So sha peaks, ir freqs et Ns
 # Nu refine peaks m'parabol'l interp'g
@@ -551,7 +564,7 @@ for impactN in range(1, impactsCount):
         N_fit=0
         impact_freq1=impactFreqs1[clust_freqN]
         #cluster_freq1=cluster_freq_peak1_tmp[clust_freqN]
-        for clust_freqN in range(QFreqs1_cluster)
+        for clust_freqN in range(QFreqs1_cluster):
             cluster_fit_N=0
             #cluster_freq1=cluster_freq_peakN1[j][0]#ob Swa V fy ze
             cluster_freq1=cluster_freq_peak1_tmp[clust_freqN]
@@ -603,4 +616,4 @@ for impactN in range(1, impactsCount):
 # et idy ut'senz N 2!
 # et calc ave vals o'freqs et amps
 #
-print("Step4 finishes working") #qwerty
+print("Step4 finishes working")

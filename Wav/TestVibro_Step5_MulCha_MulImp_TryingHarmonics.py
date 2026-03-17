@@ -32,7 +32,7 @@ filePath2=filePath+"\\"+"results"
 #
 fileOwnNames,     fs, tms, ess = ReadIniDataNamesAndFreq(SignalCharFileFullName)
 #
-filenames =[]
+filenames=[]
 ImpactLBs=[]
 ImpactHBs=[]
 #
@@ -139,7 +139,7 @@ for i in range(QFreqs2):
     print(str(i+1)+") freq="+str(freqs2[i])+" ampl="+str(amps2[i]))
 #
 print("Working with spectrum")
-GraphName="Спектр  сигнала (Избранные значения)- удар № "+str(impactN)+" - файлы "+fileOwnNames[1-1]+" и "+fileOwnNames[2-1]
+GraphName="Спектр сигнала (Избранные значения)- удар № "+str(impactN)+" - файлы "+fileOwnNames[1-1]+" и "+fileOwnNames[2-1]
             
 plot_several1(
     [

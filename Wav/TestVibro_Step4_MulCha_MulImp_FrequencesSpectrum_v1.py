@@ -195,24 +195,26 @@ for impactN in range(impactsCount):
               GraphName)
         #
     #
-    do_ElaborateFreqs=True
-    do_ElaborateImpactN=2#0
+    #do_ElaborateFreqs=True
+    #do_ElaborateImpactN=2#0
     #
     QFreqsSt=len(freqs_st)
 
-    if do_ElaborateFreqs and (do_ElaborateImpactN==0 or impactN==do_ElaborateImpactN):
+    
+    #if do_ElaborateFreqs and (do_ElaborateImpactN==0 or impactN==do_ElaborateImpactN):#all impacts et alum arbf
+    #if True:
         
-        use_window=True
-        use_detrend=False
-        use_mean=True#False
+    use_window=True
+    use_detrend=False
+    use_mean=True#False
 
-        freqs1, amps1 = compute_spectrum(si1, fs=fs, use_window=use_window)
-        freqs2, amps2 = compute_spectrum(si2, fs=fs, use_window=use_window)
-        #freqsS, ampsS = compute_spectrum(siS, fs=fs, use_window=use_window)
+    freqs1, amps1 = compute_spectrum(si1, fs=fs, use_window=use_window)
+    freqs2, amps2 = compute_spectrum(si2, fs=fs, use_window=use_window)
+    #freqsS, ampsS = compute_spectrum(siS, fs=fs, use_window=use_window)
 
-        GraphName="_Спектр_  сигнала - удар № "+str(impactN)+" - файлы "+fileOwnNames[1-1]+" и "+fileOwnNames[2-1]
+    GraphName="_Спектр_  сигнала - удар № "+str(impactN)+" - файлы "+fileOwnNames[1-1]+" и "+fileOwnNames[2-1]
         
-        plot_several1(
+    plot_several1(
                 [
                     [
                        [(freqs1, amps1)], 1
@@ -231,153 +233,158 @@ for impactN in range(impactsCount):
                 GraphName
             )
         
-        #print("now len(f1)="+str(len(freqs1))+" "+" len(f2)="+str(len(freqs2))+" "+" len(fS)="+str(len(freqsS)))
-        print("now len(f1)="+str(len(freqs1))+" "+" len(f2)="+str(len(freqs2)))
+    #print("now len(f1)="+str(len(freqs1))+" "+" len(f2)="+str(len(freqs2))+" "+" len(fS)="+str(len(freqsS)))
+    print("now len(f1)="+str(len(freqs1))+" "+" len(f2)="+str(len(freqs2)))
         
-        use_window=True
-        use_detrend=True
-        use_mean=False#True#False
+    use_window=True
+    use_detrend=True
+    use_mean=False#True#False
 
-        #def compute_spectrum(x, fs, use_window=False, use_mean=False, use_detrend=False, zero_padding_factor=1)
+    #def compute_spectrum(x, fs, use_window=False, use_mean=False, use_detrend=False, zero_padding_factor=1)
 
-        print("Корррекция _1_ спектр - добавляем mean, detrend, zero_padding_factor")
-        print(" use_window="+str(use_window)+" use_detrend="+str(use_detrend)+" use_mean="+str(use_mean)+"zero_padding_factor"+"=1")
+    print("Корррекция _1_ спектр - добавляем mean, detrend, zero_padding_factor")
+    print(" use_window="+str(use_window)+" use_detrend="+str(use_detrend)+" use_mean="+str(use_mean)+"zero_padding_factor"+"=1")
         
-        freqs1, amps1 = compute_spectrum(si1, fs=fs, use_window=use_window,  use_mean=use_mean, use_detrend=use_detrend, zero_padding_factor=1)
-        freqs2, amps2 = compute_spectrum(si2, fs=fs, use_window=use_window,  use_mean=use_mean, use_detrend=use_detrend, zero_padding_factor=1)
-        #freqsS, ampsS = compute_spectrum(siS, fs=fs, use_window=use_window,  use_mean=use_mean, use_detrend=use_detrend, zero_padding_factor=1)
+    freqs1, amps1 = compute_spectrum(si1, fs=fs, use_window=use_window,  use_mean=use_mean, use_detrend=use_detrend, zero_padding_factor=1)
+    freqs2, amps2 = compute_spectrum(si2, fs=fs, use_window=use_window,  use_mean=use_mean, use_detrend=use_detrend, zero_padding_factor=1)
+    #freqsS, ampsS = compute_spectrum(siS, fs=fs, use_window=use_window,  use_mean=use_mean, use_detrend=use_detrend, zero_padding_factor=1)
 
-        GraphName="Спектр  сигнала (корректированный)- удар № "+str(impactN)+" - файлы "+fileOwnNames[1-1]+" и "+fileOwnNames[2-1]
+    GraphName="Спектр  сигнала (корректированный)- удар № "+str(impactN)+" - файлы "+fileOwnNames[1-1]+" и "+fileOwnNames[2-1]
             
-        plot_several1(
-                [
-                    [   
-                        [(freqs1, amps1)], 1
-                    ],
-                    [
-                        [(freqs2, amps2)], 1
-                    ]
-                    #,
-                    #[
-                    #    [(freqsS, ampsS)], 1
-                    #]
-                ],
-                [
-                    ["Частота, Гц", "Амплитуда энергии сигнала"],                  
-                    ["Частота, Гц", "Амплитуда энергии сигнала"],
-                    #["Частота, Гц", "Амплитуда энергии сигнала"]
-                ],
-                None,
-                GraphName
-            )
-        #
-        print("Урезаем спектр до разумного набора.")
-        
-        freq_lim=66#66 - if less than 66, so by QForPeak==5 ne find f=62
-        
-        if freq_lim==0:
-            #pass
-            print("freq_lim==0")
-        else:
-            QFreqs=len(freqs1)
-            for i in range(1, QFreqs-1+1):
-                if freqs1[i-1]<=freq_lim and freqs1[i+1-1]>freq_lim:
-                    freqLastNN=i
-                #
-            #
-            freqs1_cut=freqs1[:freqLastNN]
-            amps1_cut =amps1[:freqLastNN]
-            #
-            QFreqs1cut=len(freqs1_cut)
-            #
-            print("sensor 1: lim f["+str(freqLastNN)+"]="+str(freqs1_cut[freqLastNN-1])+"<="+str(freq_lim)+", in all "+str(QFreqs1cut)+" vals")
-            #
-            QFreqs=len(freqs2)
-            for i in range(1, QFreqs-1+1):
-                if freqs1[i-1]<=freq_lim and freqs1[i+1-1]>freq_lim:
-                    freqLastNN=i
-                #
-            #
-            freqs2_cut=freqs2[:freqLastNN]
-            amps2_cut =amps2[:freqLastNN]
-            #
-            QFreqs2cut=len(freqs2_cut)
-            #
-            print("sensor 2: lim f["+str(freqLastNN)+"]="+str(freqs2_cut[freqLastNN-1])+"<="+str(freq_lim)+", in all "+str(QFreqs2cut)+" vals")
-            #
-            print("Nu len(f1)="+str(len(freqs1))+" "+" len(f2)="+str(len(freqs2)))
-            
-            GraphName="Спектр  сигнала (корректированный и сокращенный)- удар № "+str(impactN)+" - файлы "+fileOwnNames[1-1]+" и "+fileOwnNames[2-1]
-            
-            plot_several1(
-                [
-                    [
-                        #[(freqs1, amps1)], 1 
-                        [(freqs1_cut, amps1_cut)], 1
-                    ],
-                    [
-                        #[(freqs2, amps2)], 1 
-                        [(freqs2_cut, amps2_cut)], 1 
-                    ]
-                    #,
-                    #[
-                    #    [(freqsS, ampsS)], 1
-                    #]
-                ],
-                [
-                    ["Частота, Гц", "Амплитуда энергии сигнала"],                  
-                    ["Частота, Гц", "Амплитуда энергии сигнала"],
-                    #["Частота, Гц", "Амплитуда энергии сигнала"]
-                ],
-                None,
-                GraphName
-            )   
-            #
-        #
-        freqStacks1=copy.deepcopy(freqs1_cut)
-        freqStacks2=copy.deepcopy(freqs2_cut)# or mab os idy ress?
-        ampsStacksIni1.append(amps1_cut)
-        ampsStacksIni2.append(amps2_cut)
-        #
-    #for each impact
+    plot_several1
+    (
+        [
+            [   
+                [(freqs1, amps1)], 1
+            ],
+            [
+                [(freqs2, amps2)], 1
+            ]
+            #,
+            #[
+            #    [(freqsS, ampsS)], 1
+            #]
+        ],
+        [
+            ["Частота, Гц", "Амплитуда энергии сигнала"],                  
+            ["Частота, Гц", "Амплитуда энергии сигнала"],
+            #["Частота, Гц", "Амплитуда энергии сигнала"]
+        ],
+        None,
+        GraphName
+    )
     #
-    freqsAmpsStacks1=[]
-    freqsAmpsStacks2=[]
-    ampsStacksFin1=[]
-    ampsStacksFin2=[]
-    for freqN in range(QFreqs1cut): #I men QFreqs1cut=QFreqs2cut
-        freqsAmpsStack1=[]
-        freqsAmpsStack2=[]
+    print("Урезаем спектр до разумного набора.")
+        
+    freq_lim=66#66 - if less than 66, so by QForPeak==5 ne find f=62
+        
+    if freq_lim==0:
+        #pass
+        print("freq_lim==0")
+    else:
+        QFreqs=len(freqs1)
+        for i in range(1, QFreqs-1+1):
+            if freqs1[i-1]<=freq_lim and freqs1[i+1-1]>freq_lim:
+                freqLastNN=i
+            #
         #
-        SAAmp1=0
-        SAAmp2=0
-        for impactN in range(impactsCount):
-            amp1=ampsStacksIni1[freqN][impactN]
-            amp1q=amp1*amp1
-            SAAmp1+=amp1q
-            #
-            freqsAmpsStack1.append(amp1)
-            #
-            print(" freqN="+str(freqN)+" impactN="+str(impactN)+": amp="+str(amp1)+" amp^2="+str(amp1q)+" (sensor1)")
-            #
-            amp2=ampsStacksIni2[freqN][impactN]
-            amp2q=amp2*amp2
-            SAAmp2=amp2q
-            #
-            freqsAmpsStack2.append(amp2)
-            #
-            print(" freqN="+str(freqN)+" impactN="+str(impactN)+": amp="+str(amp2)+" amp^2="+str(amp2q)+" (sensor2)")
+        freqs1_cut=freqs1[:freqLastNN]
+        amps1_cut =amps1[:freqLastNN]
         #
-        SAAmp1=np.sqrt(SAAmp1)
-        SAAmp1/=impactsCount
-        #SAAmp1=np.sqrt(np.mean(freqsAmpsStack1**2, axis=0))#N'inty,qly realf: mean_spec = np.sqrt(np.mean(all_spectra**2, axis=0)) 
-        ampsStacksFin1.append(SAAmp1)
-        SAAmp2=np.sqrt(SAAmp2)
-        SAAmp2/=impactsCount
-        #SAAmp2=np.sqrt(np.mean(freqsAmpsStack2**2, axis=0))
-        ampsStacksFin2.append(SAAmp2)
+        QFreqs1cut=len(freqs1_cut)
         #
-        print("freqN="+str(freqN)+" amp med for sensor1="+str(SAAmp1)+" amp med for sensor2="+str(SAAmp2))
+        print("sensor 1: lim f["+str(freqLastNN)+"]="+str(freqs1_cut[freqLastNN-1])+"<="+str(freq_lim)+", in all "+str(QFreqs1cut)+" vals")
+        #
+        QFreqs=len(freqs2)
+        for i in range(1, QFreqs-1+1):
+            if freqs1[i-1]<=freq_lim and freqs1[i+1-1]>freq_lim:
+                freqLastNN=i
+            #
+        #
+        freqs2_cut=freqs2[:freqLastNN]
+        amps2_cut =amps2[:freqLastNN]
+        #
+        QFreqs2cut=len(freqs2_cut)
+        #
+        print("sensor 2: lim f["+str(freqLastNN)+"]="+str(freqs2_cut[freqLastNN-1])+"<="+str(freq_lim)+", in all "+str(QFreqs2cut)+" vals")
+        #
+        print("Nu len(f1)="+str(len(freqs1))+" "+" len(f2)="+str(len(freqs2)))
+            
+        GraphName="Спектр  сигнала (корректированный и сокращенный)- удар № "+str(impactN)+" - файлы "+fileOwnNames[1-1]+" и "+fileOwnNames[2-1]
+            
+        plot_several1
+        (
+            [
+                [
+                    #[(freqs1, amps1)], 1 
+                    [(freqs1_cut, amps1_cut)], 1
+                ],
+                [
+                    #[(freqs2, amps2)], 1 
+                    [(freqs2_cut, amps2_cut)], 1 
+                ]
+                #,
+                #[
+                #    [(freqsS, ampsS)], 1
+                #]
+            ],
+            [
+                ["Частота, Гц", "Амплитуда энергии сигнала"],                  
+                ["Частота, Гц", "Амплитуда энергии сигнала"],
+                #["Частота, Гц", "Амплитуда энергии сигнала"]
+            ],
+            None,
+            GraphName
+        )   
+        #
+    #
+    freqStacks1=copy.deepcopy(freqs1_cut)
+    freqStacks2=copy.deepcopy(freqs2_cut)# or mab os idy ress?
+    ampsStacksIni1.append(amps1_cut)
+    ampsStacksIni2.append(amps2_cut)
+    #
+    # ut'je impact sha freqs et amps.
+    # af impact cycle hado sort D.
+    #
+    #for each impact # no. S' if arbf l'freqs;
+    #
+freqsAmpsStacks1=[]
+freqsAmpsStacks2=[]
+ampsStacksFin1=[]
+ampsStacksFin2=[]
+for freqN in range(QFreqs1cut): #I men QFreqs1cut=QFreqs2cut
+    freqsAmpsStack1=[]
+    freqsAmpsStack2=[]
+    #
+    SAAmp1=0
+    SAAmp2=0
+    for impactN in range(impactsCount):
+        amp1=ampsStacksIni1[freqN][impactN]
+        amp1q=amp1*amp1
+        SAAmp1+=amp1q
+        #
+        freqsAmpsStack1.append(amp1)
+        #
+        print(" freqN="+str(freqN)+" impactN="+str(impactN)+": amp="+str(amp1)+" amp^2="+str(amp1q)+" (sensor1)")
+        #
+        amp2=ampsStacksIni2[freqN][impactN]
+        amp2q=amp2*amp2
+        SAAmp2=amp2q
+        #
+        freqsAmpsStack2.append(amp2)
+        #
+        print(" freqN="+str(freqN)+" impactN="+str(impactN)+": amp="+str(amp2)+" amp^2="+str(amp2q)+" (sensor2)")
+    #
+    SAAmp1=np.sqrt(SAAmp1)
+    SAAmp1/=impactsCount
+    #SAAmp1=np.sqrt(np.mean(freqsAmpsStack1**2, axis=0))#N'inty,qly realf: mean_spec = np.sqrt(np.mean(all_spectra**2, axis=0)) 
+    ampsStacksFin1.append(SAAmp1)
+    SAAmp2=np.sqrt(SAAmp2)
+    SAAmp2/=impactsCount
+    #SAAmp2=np.sqrt(np.mean(freqsAmpsStack2**2, axis=0))
+    ampsStacksFin2.append(SAAmp2)
+    #
+    print("freqN="+str(freqN)+" amp med for sensor1="+str(SAAmp1)+" amp med for sensor2="+str(SAAmp2))
     #
     # Nu sha lists of all freqs et ir mid'd vals o'apmls.
     # Nu exta nur freqs co big amps

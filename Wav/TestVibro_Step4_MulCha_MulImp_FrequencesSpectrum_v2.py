@@ -204,7 +204,6 @@ for impactN in range(impactsCount):
     #
     QFreqsSt=len(freqs_st)
 
-    
     #if do_ElaborateFreqs and (do_ElaborateImpactN==0 or impactN==do_ElaborateImpactN):#all impacts et alum arbf
     #if True:
         
@@ -242,7 +241,7 @@ for impactN in range(impactsCount):
         
     use_window=True
     use_detrend=True
-    use_mean=False#True#False
+    use_mean=False#False
 
     #def compute_spectrum(x, fs, use_window=False, use_mean=False, use_detrend=False, zero_padding_factor=1)
 
@@ -253,10 +252,33 @@ for impactN in range(impactsCount):
     freqs2, amps2 = compute_spectrum(si2, fs=fs, use_window=use_window,  use_mean=use_mean, use_detrend=use_detrend, zero_padding_factor=1)
     #freqsS, ampsS = compute_spectrum(siS, fs=fs, use_window=use_window,  use_mean=use_mean, use_detrend=use_detrend, zero_padding_factor=1)
 
+    print("_now _len(f1)="+str(len(freqs1))+" "+" _len(f2)="+str(len(freqs2)))
+    
     GraphName="Спектр  сигнала (корректированный)- удар № "+str(impactN)+" - файлы "+fileOwnNames[1-1]+" и "+fileOwnNames[2-1]
             
     plot_several1
     (
+        [
+            [   
+                [(freqs1, amps1)], 1
+            ],
+            [
+                [(freqs2, amps2)], 1
+            ]
+            #,
+            #[
+            #    [(freqsS, ampsS)], 1
+            #]
+        ],
+        [
+            ["Частота, Гц", "Амплитуда энергии сигнала"],                  
+            ["Частота, Гц", "Амплитуда энергии сигнала"],
+            #["Частота, Гц", "Амплитуда энергии сигнала"]
+        ],
+        None,
+        GraphName
+    )#so ne show graph ob osn'fun call, ossd ref ad fun - loc o''(' vikts!
+    plot_several1(
         [
             [   
                 [(freqs1, amps1)], 1
@@ -301,7 +323,7 @@ for impactN in range(impactsCount):
         #
         QFreqs=len(freqs2)
         for i in range(1, QFreqs-1+1):
-            if freqs1[i-1]<=freq_lim and freqs1[i+1-1]>freq_lim:
+            if freqs2[i-1]<=freq_lim and freqs2[i+1-1]>freq_lim:
                 freqLastNN=i
             #
         #
@@ -311,13 +333,10 @@ for impactN in range(impactsCount):
         QFreqs2cut=len(freqs2_cut)
         #
         print("sensor 2: lim f["+str(freqLastNN)+"]="+str(freqs2_cut[freqLastNN-1])+"<="+str(freq_lim)+", in all "+str(QFreqs2cut)+" vals")
-        #
-        print("Nu len(f1)="+str(len(freqs1))+" "+" len(f2)="+str(len(freqs2)))
-            
+                    
         GraphName="Спектр  сигнала (корректированный и сокращенный)- удар № "+str(impactN)+" - файлы "+fileOwnNames[1-1]+" и "+fileOwnNames[2-1]
             
-        plot_several1
-        (
+        plot_several1(
             [
                 [
                     #[(freqs1, amps1)], 1 
@@ -344,7 +363,7 @@ for impactN in range(impactsCount):
     #if arbf l'freqs - Nu no cond: if true 
     #freqStacks1=copy.deepcopy(freqs1_cut)
     #freqStacks2=copy.deepcopy(freqs2_cut)# or mab os idy ress?
-    freqsStackIni=copy.deepcopy(freqs1_cut))# S'sim freqs1 et freqs2 s'idy ob idq points
+    freqsStackIni=copy.deepcopy(freqs1_cut)# S'sim freqs1 et freqs2 s'idy ob idq points
     ampsStacksIni1.append(amps1_cut)
     ampsStacksIni2.append(amps2_cut)
     #
@@ -352,7 +371,8 @@ for impactN in range(impactsCount):
     # af impact cycle hado sort D.
 #for je impact
 #
-# Уточняем список номеров пиков. Если в некотором ударе есть пики, каких не было в списке - вставляем - и сразу в нужную позицию
+# Формируем (на 1-м ударе) и уточняем (на последующих) список номеров пиков.
+# Если в некотором ударе есть пики, каких не было в списке - вставляем - и сразу в нужную позицию
 #
 QFreqs=len(freqsStackIni)
 peak_Ns1=[]
@@ -362,87 +382,115 @@ freq_peaks2=[]
 peak_amps1=[]
 peak_amps2=[]
 QForPeak=5
+count_added=0
 for impactN in range(impactsCount):
+    print("impactN="+str(impactN))
+    #print("Sensor N 1")
     peak_Ns1_cur = MyFindFreqsPeaks_onlyNs(np.array(freqs1_cut), np.array(amps1_cut), QForPeak=QForPeak, vsh=0)
-    peak_Ns2_cur = MyFindFreqsPeaks_onlyNs(np.array(freqs2_cut), np.array(amps2_cut), QForPeak=QForPeak, vsh=0)
-    if freqN==0:
+    print("Freqs (sensor 1) Ns:")
+    if impactN==0:
         peak_Ns1=copy.deepcopy(peak_Ns1_cur)
-        peak_Ns2=copy.deepcopy(peak_Ns2_cur)
+        print("Ini:")
+        print(peak_Ns1)
     else:
+        print("Now:")
         countPeaks_cur=len(peak_Ns1_cur)
         countPeaks_1=len(peak_Ns1)
-        count_found1=0
+        print(peak_Ns1_cur)
         for i in range(countPeaks_cur):
+            count_found1=0
             for j in range(countPeaks_1):
                 if peak_Ns1[j] == peak_Ns1_cur[i]:
                     count_found1+=1
                 #
             #
             if count_found1==0:
+                print("New peak N found: "+str(peak_Ns1_cur[i]))
                 arr1DComparableInsByOrder(peak_Ns1, peak_Ns1_cur[i])
+                #
+                print("Now:")
+                print(peak_Ns1)
+                count_added+=1
             #
         #
-        
+    #
+    print("Freqs (sensor 2) Ns:")
+    peak_Ns2_cur = MyFindFreqsPeaks_onlyNs(np.array(freqs2_cut), np.array(amps2_cut), QForPeak=QForPeak, vsh=0)
+    if impactN==0:
+        peak_Ns2=copy.deepcopy(peak_Ns2_cur)
+        print("Ini:")
+        print(peak_Ns2)
+    else:
+        print("Now:")
         countPeaks_cur=len(peak_Ns2_cur)
         countPeaks_2=len(peak_Ns2)
-        count_found2=0
+        print(peak_Ns2_cur)
         for i in range(countPeaks_cur):
+            count_found2=0
             for j in range(countPeaks_2):
                 if peak_Ns2[j] == peak_Ns2_cur[i]:
                     count_found2+=1
                 #
             #
             if count_found2==0:
+                print("New peak N found: "+str(peak_Ns2_cur[i]))
                 arr1DComparableInsByOrder(peak_Ns2, peak_Ns2_cur[i])
+                #
+                print("Now:")
+                print(peak_Ns2)
+                count_added+=1
             #
         #
     #
 #
+print("Ns added: "+str(count_added))
+#
 # формируем 1D список частот и 2D список амплитуд: (частота, удар)
 #
-# ECRI AMDA! ##########################################################
+# freqs list = freqs1 = freqs2 (D s'idq ob idq dots of data of tbi senzs)
 #
-freqsAmpsStacks1=[]
-freqsAmpsStacks2=[]
-ampsStacksFin1=[]
-ampsStacksFin2=[]
-for freqN in range(QFreqs1cut): #I men QFreqs1cut=QFreqs2cut
-    freqsAmpsStack1=[]
-    freqsAmpsStack2=[]
-    #
-    SAAmp1=0
-    SAAmp2=0
+freqs_peak1=[]
+freqs_peak2=[]
+amps_avg_peak1=[]
+amps_avg_peak2=[]
+ampSumOfPow2=0
+for freqN in range(len(peak_Ns1)):
+    N=peak_Ns1[freqN]
+    freq=freqs1_cut[N]
+    freqs_peak1.append(freq)
+    ampsOfpow2=[]
+    amps=[]
     for impactN in range(impactsCount):
-        amp1=ampsStacksIni1[freqN][impactN]
-        amp1q=amp1*amp1
-        SAAmp1+=amp1q
-        #
-        freqsAmpsStack1.append(amp1)
-        #
-        print(" freqN="+str(freqN)+" impactN="+str(impactN)+": amp="+str(amp1)+" amp^2="+str(amp1q)+" (sensor1)")
-        #
-        amp2=ampsStacksIni2[freqN][impactN]
-        amp2q=amp2*amp2
-        SAAmp2=amp2q
-        #
-        freqsAmpsStack2.append(amp2)
-        #
-        print(" freqN="+str(freqN)+" impactN="+str(impactN)+": amp="+str(amp2)+" amp^2="+str(amp2q)+" (sensor2)")
+        amp=ampsStacksIni1[impactN][N]
+        amps.append(amp)
+        amp_pow2=amp*amp
+        ampSumOfPow2+=amp_pow2
+        ampsOfpow2.append(amp_pow2)
     #
-    SAAmp1=np.sqrt(SAAmp1)
-    SAAmp1/=impactsCount
-    #SAAmp1=np.sqrt(np.mean(freqsAmpsStack1**2, axis=0))#N'inty,qly realf: mean_spec = np.sqrt(np.mean(all_spectra**2, axis=0)) 
-    ampsStacksFin1.append(SAAmp1)
-    SAAmp2=np.sqrt(SAAmp2)
-    SAAmp2/=impactsCount
-    #SAAmp2=np.sqrt(np.mean(freqsAmpsStack2**2, axis=0))
-    ampsStacksFin2.append(SAAmp2)
+    print("peak N"+str(freqN+1)+" freq1="+str(freq)+" Amps:")
+    print(amps)
     #
-    print("freqN="+str(freqN)+" amp med for sensor1="+str(SAAmp1)+" amp med for sensor2="+str(SAAmp2))
+    amp_avg=np.sqrt(np.mean(ampsOfpow2, axis=0))
+    print("am avg="+str(amp_avg))
+    amps_avg_peak1.append(amp_avg)
+#
+for freqN in range(len(peak_Ns2)):
+    N=peak_Ns2[freqN]
+    freq=freqs2_cut[N]
+    freqs_peak2.append(freq)
+    ampsOfpow2=[]
+    amps=[]
+    for impactN in range(impactsCount):
+        amp=ampsStacksIni2[impactN][N]
+        amps.append(amp)
+        amp_pow2=amp*amp
+        ampSumOfPow2+=amp_pow2
+        ampsOfpow2.append(amp_pow2)
     #
-    # Nu sha lists of all freqs et ir mid'd vals o'apmls.
-    # Nu exta nur freqs co big amps
-    # erst exta peak vals
-    #
-    
+    print("peak N"+str(freqN+1)+" freq1="+str(freq)+" Amps:")
+    print(amps)
+    amp_avg=np.sqrt(np.mean(ampsOfpow2, axis=0))
+    print("am avg="+str(amp_avg))
+    amps_avg_peak1.append(amp_avg)
+#
 print("Step4 finishes working")

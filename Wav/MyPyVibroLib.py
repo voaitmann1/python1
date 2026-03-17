@@ -1121,6 +1121,7 @@ def plot_several1(data_groups, labels=None, styles=None, title="Signals"):
     fig.suptitle(title)
     plt.tight_layout()
     plt.show()
+    print("graph should be shown: "+title)
 
 #from scipy.signal import tukey
 
@@ -1908,6 +1909,50 @@ def MyFindFreqsPeaks(freqs, ampls, QForPeak=50, vsh=1):
     #
     return peaksNs, peakFreqs, peaks
 #
+def MyFindFreqsPeaks_onlyNs(freqs, ampls, QForPeak=50, vsh=1):
+    QFreqs=len(ampls)
+    QBefore=QForPeak
+    QAfter=QForPeak
+    peaks=[]
+    peaksNs=[]
+    peakFreqs=[]
+    for N in range(1, QFreqs-1+1):
+        fn=ampls[N-1]
+        NL1=N-QForPeak
+        NL2=N-1
+        NR1=N+1
+        NR2=N+QForPeak
+        if N<QForPeak:
+            QBefore=N
+            NL1=1
+        #
+        if N>QFreqs-QForPeak:
+            QAfrer=QFreqs-N
+            NR2=QFreqs
+        #
+        mxL=ampls[NL1-1]
+        for j in range(NL1, NL2+1):
+            f=ampls[j-1]
+            if j==NL1 or (j>NL1 and f>mxL):
+                mxL=f
+            #
+        #
+        mxR=ampls[NR1-1]
+        for j in range(NR1, NR2+1):
+            f=ampls[j-1]
+            if j==NR1 or (j>NR1 and f>mxR):
+                mxR=f
+            #
+        #
+        if fn>=mxL and fn>=mxR:
+            peakN=N
+            peaks.append(fn)
+            peaksNs.append(N)
+            peakFreqs.append(freqs[N-1])
+        #
+    #
+    return peaksNs
+#
         
       
 def FindImpactBounds(ts, signal, fs, tSectHalf=4, vsh=0):#not tested
@@ -2107,6 +2152,12 @@ def refine_peak_parabolic(freqs, amps, k):
     A_refined = y2 - 0.25 * (y1 - y3) * delta
 
     return f_refined, A_refined
+
+#def refine_peaks_parabolic(freqs, amps):
+#    f_refined=[]
+#    A_refined=[]
+#    Q=len(freqs)
+#    for k in range(
 
     
 def bandpass_filter(
@@ -2828,3 +2879,117 @@ def process_modes(x, t, fs, freq_list):
             results.append(res)
     return pd.DataFrame(results)
 
+def FindTImpactStart(X, fs, SectT=6, TrashBeforeT=1, TrashAfterT=1, MoreThanTrashCoef=3, vsh=0):
+    QAll=len(X)
+    SectLen=SectT*fs
+    dt=1/fs
+    tmax=QAll/fs
+    if vsh==1:
+        print("FindTImpactStart starts working")
+        print("fs="+str(fs)+" SectT="+str(SectT)+" TrashBeforeT="+str(TrashBeforeT)+" TrashAfterT="+str(TrashAfterT)+" MoreThanTrashCoef="+str(MoreThanTrashCoef))
+        print("QAll="+str(QAll)+" SectLen="+str(SectLen)+" dt="+str(dt)+" tmax="+str(tmax))
+    #
+    sectMaxs=[]
+    sectMaxNs=[]
+    impactsStartTs=[]
+    #find TrashMax
+    trashMax=0
+    N1=1
+    N2=int(TrashBeforeT*fs)
+    if vsh==1:
+        print("find TrashMax. Now Before.")
+        print("N1="+str(N1)+" N2="+str(N2))
+    #
+    for N in range(N1, N2+1):
+        x=X[N-1]
+        if abs(x)>trashMax:
+            trashMax= abs(x)
+        #
+    #
+    N1=int((tmax-TrashAfterT)*fs)
+    N2=QAll
+    for N in range(N1, N2+1):
+        x=X[N-1]
+        if abs(x)>trashMax:
+            trashMax= abs(x)
+        #
+    #
+    if vsh==1:
+        print("trashMax="+str(trashMax))
+    #
+    # nu trashMax s'ved, seek sectMax
+    N1=TrashBeforeT*fs
+    N2=int(QAll-TrashAfterT*fs-SectLen)
+    if vsh==1:
+        print("Seek impacts starts ipse - whole range is: N1="+str(N1)+" N2="+str(N2))
+    #
+    i=0
+    while i<N2:
+        i+=1
+        if vsh==1:
+            print("Seek impacts start in cur range: N1="+str(i)+" N2="+str(i+SectLen-1)+" (QAll="+str(QAll)+") t1="+str(i/fs)+"...t2="+str((i+SectLen)/fs)+" tmax="+str(tmax))
+        #
+        for j in range(1, SectLen+1):
+            N=i+j-1
+            x=X[N-1]
+            if j==1 or (j>1 and abs(x)>sectMax):
+                sectMax=abs(x)
+                sectMaxN=N
+                impactsStartT=sectMaxN/fs
+                if vsh==1:
+                    print("now cur max of cur range: N="+str(sectMaxN)+" val="+str(sectMax)+" = "+str(X[sectMaxN-1])+" tSt="+str(impactsStartT))
+                #
+            #
+        #
+        if sectMax>MoreThanTrashCoef*trashMax:
+            count=len(impactsStartTs)
+            if count>0:
+                latestMax=sectMaxs[count-1]
+                latestMaxT=impactsStartTs[count-1]
+                latestMaxN=impactsStartTs[count-1]
+            #
+            if count==0 or ( count>0 and abs(latestMaxT-impactsStartT) > SectT ):
+                sectMaxs.append(sectMax)
+                sectMaxNs.append(sectMaxN)
+                impactsStartTs.append(impactsStartT)
+                if vsh==1:
+                    if count==0:
+                        print("First impact bound found: N="+str(sectMaxN)+" val="+str(sectMax)+" tStart="+str(impactsStartT))
+                    elif abs(latestMaxT-impactsStartT)>SectT :
+                        print("New ("+str(count)+") impact bound found (tnew="+str(impactsStartT)+" is far enough from prev t="+str(latestMaxT)+"): N="+str(sectMaxN)+" val="+str(sectMax)+" tStart="+str(impactsStartT))
+                    #
+                #
+            elif count >0 and abs(latestMaxT-impactsStartT)<=SectT:
+                if sectMax>latestMax:
+                    if vsh==1:
+                        print("New found val is too close to prev (tnew="+str(impactsStartT)+" is too close to prev t="+str(latestMaxT)+") and it is greater, so re-recording: new vals are: N="+str(sectMaxN)+" val="+str(sectMax)+" tStart="+str(impactsStartT))
+                    #
+                    sectMaxs[count-1]=sectMax
+                    sectMaxNs[count-1]=sectMaxN
+                    impactsStartTs[count-1]=impactsStartT
+                else:#sectMax<=latestMax
+                    if vsh==1:
+                        print("New found val is too close to prev (tnew="+str(impactsStartT)+" is too close to prev t="+str(latestMaxT)+") and prev vals are greater - they remain, new not used")
+                    #
+                #
+            #
+            if vsh==1:
+                print("max of cur range: N="+str(sectMaxN)+" val="+str(sectMax)+" tStart="+str(impactsStartT))
+            #
+            #i+=SectLen
+        else:
+            if vsh==1:
+                print("New found value is too small")
+            #
+        #
+        i+=SectLen
+    #
+    if vsh==1:
+        print("Answer")
+        print(sectMaxs)
+        print(sectMaxNs)
+        print(impactsStartTs)
+        print("FindTImpactStart finishes working")
+    #
+    return impactsStartTs
+#

@@ -1,5 +1,6 @@
 from MyPyVibroLib import *
 
+
 print("Step1 starts working")
 print("\nThink about what impact to choose for elaboration an find its bounds\n")
 
@@ -86,9 +87,9 @@ if __name__ == "__main__":#qo sdi?
     ##
     filePath, QFiles, fileOwnNames, channels =  read_csv_of_files_and_channels(PathToNamesFile+"\\"+"FolderAndFiles.csv")              
     
-    print("Must work with")
-    print("path: C:\\Users\\user\\Documents\\MyPrgs\\Python\\Wav")
-    print("files: 051_1_M.wav, 051-2.wav")
+    #print("Must work with")
+    #print("path: C:\\Users\\user\\Documents\\MyPrgs\\Python\\Wav")
+    #print("files: 051_1_M.wav, 051-2.wav")
     print("Working with:")
     print("path: "+filePath)
     print("Files: "+str(QFiles))
@@ -132,19 +133,20 @@ if __name__ == "__main__":#qo sdi?
     energySums_allRecs=[]
     filechars_allRecs=[]
     fileN=0
-    for fname in filenames:
-        #fname+=".wav"#new
+    #for fname in filenames:
+    for fileOwnName in fileOwnNames:
+        fname=filePathIniData+"\\"+fileOwnName
         fileN+=1
-        #reading wav
-        #t, signal, fs = read_wav_and_calc_t(fname)# here !
-        #fs, n_channels, data = read_wav_safe_2(fname, max_seconds=None, channel=None)
-        #t, n_channels, signal, fs = read_wav_and_calc_t_1(fname, max_seconds=None)
         t, n_channels, signal, fs = read_wav_and_calc_t_1(fname+".wav", max_seconds=None)
         #writing to csv
         if n_channels==1:
             #fileN+=1
-            print("Single-channel")       
+            print("Single-channel")
             csv_filename = os.path.splitext(fname)[0] + "_signal_whole.csv"
+            csv_filename = OwnNameOfFullName(fname) + "_signal_whole.csv"
+            csv_fileOwnName = fileOwnName + "_signal_whole.csv"
+            csv_filename = filePathIniData+"\\"+csv_fileOwnName
+            print("writing to file: "+csv_filename)
             with open(csv_filename, mode='w', newline='') as f:
                 writer = csv.writer(f)
                 #writer.writerow(["Time_s", "Signal"])
@@ -155,12 +157,16 @@ if __name__ == "__main__":#qo sdi?
         elif n_channels>1:
             print("Multy-channel")
             #if ifMultiChannel_AllChannelsIn1File_not_1File1Channel==False:
+            print("now analyzing file name")
             csv_filenames_cnns=[]
             for chN in range(n_channels):
                 #csv_filenameударов = os.path.splitext(fname)[0] +"_channelN"+str(chN)+"_signal_whole.csv"#wa so!
                 #csv_filename = os.path.splitext(fname)[0] +"_channelN"+str(chN)+"_signal_whole.csv"
-                csv_filename = os.path.splitext(fname)[0] +"_chN"+str(chN)+"_signal_whole.csv"
+                csv_filename = os.path.splitext(fname)[0]+"_chN"+str(chN)+"_signal_whole.csv"
+                csv_filename = OwnNameOfFullName(fname)+"_chN"+str(chN)+"_signal_whole.csv"
                 csv_filenames_cnns.append(csv_filename)
+                csv_fileOwnName = fileOwnName+"_chN"+str(chN)+"_signal_whole.csv"
+                csv_filename = filePathIniData+"\\"+csv_fileOwnName
                 with open(csv_filename, mode='w', newline='') as f:
                     writer = csv.writer(f)
                     #print("csv_filename="+csv_filename+" hope is open")
@@ -296,13 +302,32 @@ if __name__ == "__main__":#qo sdi?
 
             plt.xlabel("Время, с")
             plt.ylabel("Амплитуда")
-            plt.title(f"Сигнал с разделительными линиями сегментов {fileOwnNames[fileN-1]}")
+            plt.title(f"Сигнал с разделительными линиями сегментов (способ 1) {fileOwnNames[fileN-1]}")
             plt.plot(t, signal)#signal ablb maq-dim arr. If so, plt.plot int ce et plot in idy CS l'curves ot dims! Et uz tic utas -show impact bnds - os norm
             plt.legend()
             plt.grid(True)
             plt.show()
             #        
         #if do_DefImpactBoundsAuto
+        #
+        print("Рекомендуемые диапазоны (способ 2):")
+        #allSegments=[]
+        ymin, ymax = np.min(signal), np.max(signal)
+        if n_channels==1:
+            peaks_time= FindTImpactStart(signal, fs, SectT=6, TrashBeforeT=1, TrashAfterT=1, MoreThanTrashCoef=2, vsh=1)
+        elif n_channels>1:
+            for chN in range(n_channels):
+                signal_chn=signal_chn=signal[:,chN]
+                peaks_time = FindTImpactStart(signal_chn, fs, SectT=6, TrashBeforeT=1, TrashAfterT=1, MoreThanTrashCoef=2, vsh=1)
+            #
+            allSegments.append(segments)
+            #
+            print("Bounds")
+            for seg in segments:
+                print(str(seg[1-1])+"..."+str(seg[2-1]))
+            #
+        ImpactStartTs = FindTImpactStart(signal_chn, fs, SectT=6, TrashBeforeT=1, TrashAfterT=1, MoreThanTrashCoef=2, vsh=1)
+        print(ImpactStartTs)
     #for fname in filenames
     
     #if channels[fileN-1]==1:
@@ -392,5 +417,9 @@ if __name__ == "__main__":#qo sdi?
                 print(str(t1)+" ... "+str(t2))
         else:
             print("не найдены")
+    
+    #print("Рекомендуемые диапазоны (способ 2):")
+    #ImpactStartTs = FindTImpactStart(signal_chn, fs, SectT=6, TrashBeforeT=1, TrashAfterT=1, MoreThanTrashCoef=2, vsh=1)
+    #print(ImpactStartTs)
             
 print("Step1 finishes working")

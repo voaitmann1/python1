@@ -79,6 +79,7 @@ peaks, props = find_peaks(
     prominence=0.05*np.max(avg_amps),
     distance=5
 )
+#
 #STEP 4 — refine peaks
 refined_freqs, refined_amps = refine_all_peaks(freqs, avg_amps, peaks)
 

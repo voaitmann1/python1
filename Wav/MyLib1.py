@@ -491,12 +491,14 @@ def arr1DComparableInsByOrder(arr, val, vsh=0):
             arr1DIns(arr, val, 1, vsh)
         elif poss.isGreater:
             arr.append(val)
+        elif poss.lessNN>0:
+            arr1DIns(arr, val, poss.lessNN+1, vsh)
         else:
-            arr1DIns(arr, val, poss.lessNN, vsh)
+            print("already present at pos "+str( poss.equalNN))
         #
     #
 #
-        
+
 
 #arr=[10, 20, 40, 50, 60, 70, 80, 90]
 #arr1DIns(arr, 30, 3, vsh=1)

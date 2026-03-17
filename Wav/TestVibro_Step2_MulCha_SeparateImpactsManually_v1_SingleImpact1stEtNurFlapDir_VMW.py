@@ -1,11 +1,42 @@
 from MyPyVibroLib import *
 
+
+def FindImpactsStartTimesNs(X, fs, dTSect=6, preTailT=1, postTailT=1):
+    sT=[]
+    dt=1/fs
+    QPointsAll=len(X)
+    QPointsSect=dTSect*fs
+    maxs=[]
+    maxNs=[]
+    pointN=0
+    while i<=QPointsAll-QPointsSect:
+        i+=1
+        for j in range(1, QPointsSect+1):
+            N=j+i
+            x=X[N-1]
+            if (j==1 or abs(x)>curMax):
+                Found=True
+                curMax=abs(x)
+                curMaxNN=N
+            #
+        #
+        if Found:
+            maxs.append(curMax)
+            maxNs.append(curMaxNN)
+            #
+            i+=QPointsSect
+            i-=1
+        #
+    #        
+    return maxNs        
+
 if __name__ == "__main__":
 
     print("Step2 starts working")
 
     fileEnding_toRead="_signal_whole.csv"
     fileEnding_toWrite="_SingleImpactRange"+".csv"
+    fileEnding_toWrite1="_ImpactsRanges.csv"
     PathToNamesFile="C:\\Users\\user\\Documents\\MyPrgs\\Python\\Wav\\data"
     #fileOwnNames=[]
     #fileIniNames=[]
@@ -64,6 +95,8 @@ if __name__ == "__main__":
         # Abls hin calc spectrum. Ma 
     #
     #print("N "+str(fN)+" "+fNm+" fs="+str(fs)+" => dt=1/fs="+str(dt)+" tmax="+str(tmax)+" es="+str(es))
+    #
+    impacts=[]
     #
     #-----------------------------------------
     #if fileIniNames[1-1]=="051_1_M" and fileIniNames[2-1]=="051-2":
@@ -387,18 +420,18 @@ if __name__ == "__main__":
         ImpHB=62.4
 
         impacts=[
-        [12.6, [13.3]],#a'chN1to s'noise, ne impact
-        [31.0, [40.0, 38.5]],
-        [42.8, [51.7, 51.3]],
-        [52.4, [61.2, 59.9]],
-        [62.8, [71.8, 69.9]],
-        [72.8, [82.0, 91.8]],
-        [83.1, [92.1, 92.5]],
-        [93.0, [101.3, 100.3]],
-        [102.9, [111.7, 112.1]],
-        [112.8, [120.5, 121.6]],
-        [123.0, [130.7, 131.5]],
-        [133.3, [140.3, 142.6]]
+            [12.6, [13.3]],#a'chN1to s'noise, ne impact
+            [31.0, [40.0, 38.5]],
+            [42.8, [51.7, 51.3]],
+            [52.4, [61.2, 59.9]],
+            [62.8, [71.8, 69.9]],
+            [72.8, [82.0, 91.8]],
+            [83.1, [92.1, 92.5]],
+            [93.0, [101.3, 100.3]],
+            [102.9, [111.7, 112.1]],
+            [112.8, [120.5, 121.6]],
+            [123.0, [130.7, 131.5]],
+            [133.3, [140.3, 142.6]]
         ]
     #--------------------------------
     elif fileOwnNames[1-1]=="0038_chN0" and fileOwnNames[2-1]=="0038_chN1":
@@ -408,6 +441,18 @@ if __name__ == "__main__":
     elif fileOwnNames[1-1]=="0038-03.12.25-МС0042511-1_chN0" and fileOwnNames[2-1]=="0038-03.12.25-МС0042511-1_chN1":
         ImpLB=44.8#29.12
         ImpHB=54.9
+         #
+        impacts=[
+            [4.41, [8.6, 9.1]],
+            [15.83, [20, 23.2]],
+            [24.79, [32.3, 31.1]],
+            [35.2, [38.7, 40.0]],
+            [44.8, [49.9, 52.2]],
+            [55.03, [58.6, 62.3]],
+            [64.9, [71.3, 71.2]],
+            [75.04, [81.4, 81.3]],
+            [85.27, [90.0, 90.3]]
+        ]
     #--------------------------------
     elif fileOwnNames[1-1]=="0039-03.12.25-МС0042511-2_chN0" and fileOwnNames[2-1]=="0039-03.12.25-МС0042511-2_chN1":
         ImpLB=63.1
@@ -501,12 +546,61 @@ if __name__ == "__main__":
         #    print(fileIniNames[i])
         for i in range(len(fileOwnNames)):
             print(fileOwnNames[i])
-    print(str(ImpLB)+" ... "+str(ImpHB))
+    #print(str(ImpLB)+" ... "+str(ImpHB))
+    ##
+    #impacts = [
+    #    [1, ImpLB, ImpHB],#for flap dir (1st dir) 
+    #    [2, 1.23, 5.67]#for rest, rot, dir
+    #]
+    if impacts==[]:
+        impacts=[ImpLB, ImpHB]
     #
-    impacts = [
-        [1, ImpLB, ImpHB],#for flap dir (1st dir) 
-        [2, 1.23, 5.67]#for rest, rot, dir
-    ]
+    QFiles=len(fileOwnNames)
+    fN=0
+    csv_filename=""
+    for fileOwnName in fileOwnNames:#
+        fN+=1
+        csv_filename+=fileOwnName
+        if fN<QFiles:
+            csv_filename+="_and_"
+        #
+    #
+    csv_filename+=fileEnding_toWrite1
+    QImpacts=len(impacts)
+    print("writing to "+filePathData+"\\"+csv_filename+" "+str(QImpacts)+" impact ranges:")
+    with open(filePathData+"\\"+csv_filename, mode='w', newline='') as f:
+        writer=csv.writer(f)
+        writer.writerow(["impactN", "tStart", "tFin1", "tFin2"])
+        for i in range(1, QImpacts+1):
+            impact=impacts[i-1]
+            tStart=impact[1-1]
+            tFin=impact[2-1]
+            if isinstance(tFin, list):
+                if len(tFin)==0:
+                    if i==QImpacts:
+                        tFin=tmax-1
+                    else:
+                        impact_next=impacts[i+1-1]
+                        tStart=impact_next[1-1]
+                        tFin=tStart-10/fs
+                    #
+                elif len(tFin)==1:
+                    tFin1=tFin[1-1]
+                    tFin2=tFin1
+                else:
+                    tFin1=tFin[1-1]
+                    tFin2=tFin[2-1]
+                #
+            else:
+                tFin1=tFin
+                tFin2=tFin1
+            #
+            impactN=i
+            row=[str(impactN), str(tStart), str(tFin1), str(tFin2)]
+            writer.writerow(row)
+        #
+    #
+    print("writtten to "+filePathData+"\\"+csv_filename+" "+str(QImpacts)+" impact ranges successfully")
     #
     computeSpectrum=True#False#True
     #
@@ -571,24 +665,28 @@ if __name__ == "__main__":
               GraphName)
         #nu plot fragms
 
-        plot_signal(t, signal, title="Единичный удар . "+fileOwnName, t_start=ImpLB, t_end=ImpHB)
-        #plot_signal(t_sngl, x_sngl, title="Единичный удар .. "+fileOwnName)
-        #plot_signal(t_sngl1, x_sngl1, title="Единичный удар ... "+fileOwnName)
+        do_OldVerasionActions=False
+
+        if do_OldVerasionActions:
+
+            plot_signal(t, signal, title="Единичный удар . "+fileOwnName, t_start=ImpLB, t_end=ImpHB)
+            #plot_signal(t_sngl, x_sngl, title="Единичный удар .. "+fileOwnName)
+            #plot_signal(t_sngl1, x_sngl1, title="Единичный удар ... "+fileOwnName)
     
-        print(fileOwnName+" => "+fileOwnName[:-10])
+            print(fileOwnName+" => "+fileOwnName[:-10])
             
-        #csv_filename=fname[:-10]+"_SingleImpactRange"+".csv"
-        #csv_filename="data"+"\\"+fileIniName+fileEnding_toWrite
-        csv_filename="data"+"\\"+fileOwnName+fileEnding_toWrite
-        #csv_filename=filePathData+"\\"+fileIniName+"_SingleImpactRange"+".csv"#
+            #csv_filename=fname[:-10]+"_SingleImpactRange"+".csv"
+            #csv_filename="data"+"\\"+fileIniName+fileEnding_toWrite
+            csv_filename="data"+"\\"+fileOwnName+fileEnding_toWrite
+            #csv_filename=filePathData+"\\"+fileIniName+"_SingleImpactRange"+".csv"#
     
-        with open(csv_filename, mode='w', newline='') as f:
-            writer = csv.writer(f)
-            #writer.writerow(["Time_s", "Signal"])
-            writer.writerow(["Time_s", "Signal", "Energy"])
-            for i in range(1, len(t_sngl)+1):
-                writer.writerow([t_sngl[i-1], x_sngl[i-1], x_sngl[i-1]*x_sngl[i-1]])
-        print(csv_filename+" file for single impact process is written")
+            with open(csv_filename, mode='w', newline='') as f:
+                writer = csv.writer(f)
+                #writer.writerow(["Time_s", "Signal"])
+                writer.writerow(["Time_s", "Signal", "Energy"])
+                for i in range(1, len(t_sngl)+1):
+                    writer.writerow([t_sngl[i-1], x_sngl[i-1], x_sngl[i-1]*x_sngl[i-1]])
+            print(csv_filename+" file for single impact process is written")
 
     print("Step2 finishes working")
         

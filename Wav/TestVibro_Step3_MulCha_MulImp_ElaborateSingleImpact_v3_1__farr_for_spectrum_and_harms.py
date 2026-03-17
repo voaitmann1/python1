@@ -172,7 +172,7 @@ with open(dst_path_mul, mode='a', newline='', encoding='utf-8') as dst_f_mul:
         #
         print("Impact N "+str(impactN)+" "+" tStart="+str(tStart)+" tFin1="+str(tFin1)+" tFin2="+str(tFin2)+" ImpHB="+str(ImpHB))
         #
-        print("____tmin="+str(tss[0])+" tmax="+str(tss[-1])+" ImpLB="+str(ImpLB)+" ImpHB="+str(ImpHB))
+        print("tmin="+str(tss[0])+" tmax="+str(tss[-1])+" ImpLB="+str(ImpLB)+" ImpHB="+str(ImpHB))
         #
         ts=[]
         si1=[]
