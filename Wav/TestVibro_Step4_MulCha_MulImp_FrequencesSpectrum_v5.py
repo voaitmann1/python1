@@ -615,9 +615,7 @@ count_added=count_added1+count_added2
 print("Ns added (for both): "+str(count_added))
 #
 freq_clusters1_med=[]
-freq_clusters12_med=[]
 amp_clusters1_med=[]
-amp_clusters12_med=[]
 QClusters1=len(freq_clusters1)
 for clusterN in range(QClusters):
     clusterFreq=freq_clusters1[clusterN]
@@ -625,6 +623,18 @@ for clusterN in range(QClusters):
     freq_ofCluster=np.mean(np.array(clusterFreq))
     amp_ofCluster= np.sqrt(np.mean(np.array(amps_clusters1[clusterN])**2))
     freq_clusters1_med.append(freq_ofCluster)
-    amp_clusters1_med.append(amp_clusters1_med
+    amp_clusters1_med.append(amp_ofCluster)
 #
+freq_clusters2_med=[]
+amp_clusters2_med=[]
+QClusters2=len(freq_clusters2)
+for clusterN in range(QClusters):
+    clusterFreq=freq_clusters2[clusterN]
+    clusterAmp=amp_clusters2[clusterN]
+    freq_ofCluster=np.mean(np.array(clusterFreq))
+    amp_ofCluster= np.sqrt(np.mean(np.array(amps_clusters2[clusterN])**2))
+    freq_clusters2_med.append(freq_ofCluster)
+    amp_clusters1_med.append(amp_ofCluster)
+#
+print("average values")
 print("Step4 finishes working")
